@@ -1,17 +1,9 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - PS Rent Station</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link href="{{ asset('css/auth.css') }}" rel="stylesheet">
-</head>
-<body class="auth-body">
+@extends('layouts.auth')
+
+@section('title', 'Login - PS Rent Station')
+
+@section('content')
     <div class="auth-container">
-        <!-- Left Panel -->
         <div class="auth-panel auth-panel-left">
             <div class="auth-panel-content">
                 <div class="brand-section">
@@ -39,7 +31,6 @@
             </div>
         </div>
 
-        <!-- Right Panel - Login Form -->
         <div class="auth-panel auth-panel-right">
             <div class="auth-form-wrapper">
                 <a href="{{ url('/') }}" class="back-home">
@@ -119,20 +110,20 @@
             </div>
         </div>
     </div>
+@endsection
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        function togglePassword(id) {
-            const input = document.getElementById(id);
-            const icon = input.nextElementSibling.querySelector('i');
-            if (input.type === 'password') {
-                input.type = 'text';
-                icon.classList.replace('fa-eye', 'fa-eye-slash');
-            } else {
-                input.type = 'password';
-                icon.classList.replace('fa-eye-slash', 'fa-eye');
-            }
+@push('scripts')
+<script>
+    function togglePassword(id) {
+        const input = document.getElementById(id);
+        const icon = input.nextElementSibling.querySelector('i');
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.classList.replace('fa-eye', 'fa-eye-slash');
+        } else {
+            input.type = 'password';
+            icon.classList.replace('fa-eye-slash', 'fa-eye');
         }
-    </script>
-</body>
-</html>
+    }
+</script>
+@endpush

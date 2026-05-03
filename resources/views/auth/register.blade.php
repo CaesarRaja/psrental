@@ -1,17 +1,9 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register - PS Rent Station</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link href="{{ asset('css/auth.css') }}" rel="stylesheet">
-</head>
-<body class="auth-body">
+@extends('layouts.auth')
+
+@section('title', 'Register - PS Rent Station')
+
+@section('content')
     <div class="auth-container auth-container-register">
-        <!-- Left Panel - Register Form -->
         <div class="auth-panel auth-panel-right order-lg-1 order-2">
             <div class="auth-form-wrapper">
                 <a href="{{ url('/') }}" class="back-home">
@@ -114,7 +106,6 @@
             </div>
         </div>
 
-        <!-- Right Panel -->
         <div class="auth-panel auth-panel-left order-lg-2 order-1">
             <div class="auth-panel-content">
                 <div class="brand-section">
@@ -147,37 +138,43 @@
             </div>
         </div>
     </div>
+@endsection
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        function togglePassword(id) {
-            const input = document.getElementById(id);
-            const icon = input.nextElementSibling.querySelector('i');
-            if (input.type === 'password') {
-                input.type = 'text';
-                icon.classList.replace('fa-eye', 'fa-eye-slash');
-            } else {
-                input.type = 'password';
-                icon.classList.replace('fa-eye-slash', 'fa-eye');
-            }
+@push('scripts')
+<script>
+    function togglePassword(id) {
+        const input = document.getElementById(id);
+        const icon = input.nextElementSibling.querySelector('i');
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.classList.replace('fa-eye', 'fa-eye-slash');
+        } else {
+            input.type = 'password';
+            icon.classList.replace('fa-eye-slash', 'fa-eye');
         }
+    }
 
-        document.getElementById('password').addEventListener('input', function() {
-            const password = this.value;
-            const fill = document.getElementById('strengthFill');
-            const text = document.getElementById('strengthText');
-            let strength = 0;
-            if (password.length >= 8) strength++;
-            if (password.match(/[a-z]/) && password.match(/[A-Z]/)) strength++;
-            if (password.match(/\d/)) strength++;
-            if (password.match(/[^a-zA-Z\d]/)) strength++;
+    document.addEventListener('DOMContentLoaded', function() {
+        const passwordInput = document.getElementById('password');
+        const strengthFill = document.getElementById('strengthFill');
+        const strengthText = document.getElementById('strengthText');
 
-            const colors = ['#dc3545', '#fd7e14', '#ffc107', '#28a745'];
-            const labels = ['Lemah', 'Sedang', 'Kuat', 'Sangat Kuat'];
-            fill.style.width = (strength * 25) + '%';
-            fill.style.backgroundColor = colors[strength - 1] || '#dc3545';
-            text.textContent = labels[strength - 1] || '';
-        });
-    </script>
-</body>
-</html>
+        if (passwordInput) {
+            passwordInput.addEventListener('input', function() {
+                const password = this.value;
+                let strength = 0;
+                if (password.length >= 8) strength++;
+                if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++;
+                if (/\d/.test(password)) strength++;
+                if (/[^a-zA-Z\d]/.test(password)) strength++;
+
+                const colors = ['#dc3545', '#fd7e14', '#ffc107', '#28a745'];
+                const labels = ['Lemah', 'Sedang', 'Kuat', 'Sangat Kuat'];
+                strengthFill.style.width = (strength * 25) + '%';
+                strengthFill.style.backgroundColor = colors[Math.max(0, strength - 1)];
+                strengthText.textContent = labels[Math.max(0, strength - 1)] || '';
+            });
+        }
+    });
+</script>
+@endpush

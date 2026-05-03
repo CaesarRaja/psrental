@@ -1,15 +1,8 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PS Rent Station - Rental PlayStation Terbaik</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link href="{{ asset('css/style.css') }}" rel="stylesheet">
-</head>
-<body>
+@extends('layouts.guest')
+
+@section('title', 'PS Rent Station - Rental PlayStation Terbaik')
+
+@section('content')
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark fixed-top" id="mainNavbar">
         <div class="container">
@@ -46,7 +39,6 @@
         </div>
     </nav>
 
-    <!-- Hero Section -->
     <section class="hero-section" id="beranda">
         <div class="hero-particles" id="particles"></div>
         <div class="container">
@@ -118,7 +110,6 @@
         </div>
     </section>
 
-    <!-- Features Section -->
     <section class="features-section" id="fitur">
         <div class="container">
             <div class="section-header text-center" data-aos="fade-up">
@@ -157,41 +148,10 @@
                         <div class="feature-line"></div>
                     </div>
                 </div>
-                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="400">
-                    <div class="feature-card">
-                        <div class="feature-icon">
-                            <i class="fas fa-credit-card"></i>
-                        </div>
-                        <h4>Pembayaran Mudah</h4>
-                        <p>Bayar dengan cash, transfer bank, atau QRIS. Cepat dan aman.</p>
-                        <div class="feature-line"></div>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="500">
-                    <div class="feature-card">
-                        <div class="feature-icon">
-                            <i class="fas fa-headphones-alt"></i>
-                        </div>
-                        <h4>Game Lengkap</h4>
-                        <p>500+ game dari berbagai genre. FIFA, PES, GTA, God of War, dan masih banyak lagi.</p>
-                        <div class="feature-line"></div>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="600">
-                    <div class="feature-card">
-                        <div class="feature-icon">
-                            <i class="fas fa-couch"></i>
-                        </div>
-                        <h4>Room Nyaman</h4>
-                        <p>Ruang ber-AC, sofa empuk, layar TV besar. Gaming session yang nyaman!</p>
-                        <div class="feature-line"></div>
-                    </div>
-                </div>
             </div>
         </div>
     </section>
 
-    <!-- Pricing Section -->
     <section class="pricing-section" id="harga">
         <div class="container">
             <div class="section-header text-center" data-aos="fade-up">
@@ -267,7 +227,6 @@
         </div>
     </section>
 
-    <!-- Testimonial Section -->
     <section class="testimonial-section">
         <div class="container">
             <div class="section-header text-center" data-aos="fade-up">
@@ -286,9 +245,7 @@
                         </div>
                         <p class="testimonial-text">"Tempat rental PS terbaik yang pernah saya kunjungi! Console bersih, game lengkap, dan pelayanan ramah."</p>
                         <div class="testimonial-author">
-                            <div class="author-avatar">
-                                <span>AR</span>
-                            </div>
+                            <div class="author-avatar"><span>AR</span></div>
                             <div class="author-info">
                                 <h6>Ahmad Rizky</h6>
                                 <small>Gamer</small>
@@ -307,9 +264,7 @@
                         </div>
                         <p class="testimonial-text">"Sistem reservasi online sangat memudahkan. Bisa pesan dari rumah dan langsung main begitu sampai."</p>
                         <div class="testimonial-author">
-                            <div class="author-avatar">
-                                <span>DP</span>
-                            </div>
+                            <div class="author-avatar"><span>DP</span></div>
                             <div class="author-info">
                                 <h6>Dina Putri</h6>
                                 <small>Streamer</small>
@@ -328,9 +283,7 @@
                         </div>
                         <p class="testimonial-text">"Harga terjangkau, fasilitas premium. VR experience-nya luar biasa! Pasti bakal balik lagi."</p>
                         <div class="testimonial-author">
-                            <div class="author-avatar">
-                                <span>BS</span>
-                            </div>
+                            <div class="author-avatar"><span>BS</span></div>
                             <div class="author-info">
                                 <h6>Budi Santoso</h6>
                                 <small>Content Creator</small>
@@ -342,7 +295,6 @@
         </div>
     </section>
 
-    <!-- CTA Section -->
     <section class="cta-section">
         <div class="container">
             <div class="cta-content text-center" data-aos="zoom-in">
@@ -355,7 +307,6 @@
         </div>
     </section>
 
-    <!-- Footer -->
     <footer class="footer-section">
         <div class="container">
             <div class="row g-4">
@@ -407,13 +358,18 @@
         </div>
     </footer>
 
-    <!-- Back to Top -->
     <a href="#" class="back-to-top" id="backToTop">
         <i class="fas fa-arrow-up"></i>
     </a>
+@endsection
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
-    <script src="{{ asset('js/main.js') }}"></script>
-</body>
-</html>
+@push('scripts')
+<script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof AOS !== 'undefined') {
+            AOS.init({ duration: 800, once: true });
+        }
+    });
+</script>
+@endpush
