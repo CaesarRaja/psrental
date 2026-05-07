@@ -35,6 +35,15 @@
                 <i class="fas fa-clock"></i>
             </div>
         </div>
+        <div class="stat-card">
+            <div class="stat-info">
+                <h6>Pesanan Makanan Pending</h6>
+                <h3>{{ $pendingFoodOrders ?? 0 }}</h3>
+            </div>
+            <div class="stat-icon icon-purple">
+                <i class="fas fa-utensils"></i>
+            </div>
+        </div>
     </div>
 
     <div class="dashboard-card mb-4">
@@ -50,7 +59,9 @@
                             <th>Console</th>
                             <th>Tanggal</th>
                             <th>Durasi</th>
-                            <th>Total</th>
+                            <th>Total Reservasi</th>
+                            <th>Makanan</th>
+                            <th>Total Keseluruhan</th>
                             <th>Status Pembayaran</th>
                             <th>Aksi</th>
                         </tr>
@@ -62,7 +73,20 @@
                             <td>{{ $reservation->console_type }}</td>
                             <td>{{ \Carbon\Carbon::parse($reservation->date)->format('d M Y') }}</td>
                             <td>{{ $reservation->duration }} jam</td>
-                            <td><strong>Rp {{ number_format($reservation->total_price) }}</strong></td>
+                            <td>Rp {{ number_format($reservation->total_price) }}</td>
+                            <td>
+                                @php
+                                    $reservationFoodTotal = \App\Models\FoodOrder::where('reservation_id', $reservation->id)
+                                        ->whereIn('status', ['approved', 'delivered'])
+                                        ->sum('total');
+                                @endphp
+                                @if($reservationFoodTotal > 0)
+                                    Rp {{ number_format($reservationFoodTotal) }}
+                                @else
+                                    -
+                                @endif
+                            </td>
+                            <td><strong>Rp {{ number_format($reservation->total_price + $reservationFoodTotal) }}</strong></td>
                             <td>
                                 @if($reservation->payment)
                                     <span class="status-badge status-{{ $reservation->payment->status }}">{{ ucfirst($reservation->payment->status) }}</span>
@@ -72,11 +96,18 @@
                             </td>
                             <td>
                                 @if(!$reservation->payment || $reservation->payment->status === 'cancelled')
-                                <button class="btn btn-sm btn-outline-primary" disabled>
+                                <button class="btn btn-sm btn-primary" onclick="showInvoice({{ $reservation->id }})">
                                     <i class="fas fa-credit-card"></i> Bayar
                                 </button>
                                 @elseif($reservation->payment->status === 'pending')
                                 <span class="badge bg-warning text-dark"><i class="fas fa-clock me-1"></i> Menunggu</span>
+                                @elseif($reservation->payment->status === 'rejected')
+                                <div>
+                                    <span class="badge bg-danger"><i class="fas fa-times me-1"></i> Ditolak</span>
+                                    @if($reservation->payment->rejection_reason)
+                                    <br><small class="text-danger">{{ $reservation->payment->rejection_reason }}</small>
+                                    @endif
+                                </div>
                                 @else
                                 <span class="badge bg-success"><i class="fas fa-check me-1"></i> Lunas</span>
                                 @endif
@@ -84,7 +115,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="7" class="text-center text-muted py-4">Tidak ada reservasi yang perlu dibayar</td>
+                            <td colspan="9" class="text-center text-muted py-4">Tidak ada reservasi yang perlu dibayar</td>
                         </tr>
                         @endforelse
                     </tbody>
@@ -92,4 +123,130 @@
             </div>
         </div>
     </div>
+
+    <!-- Invoice Modal -->
+    <div class="modal fade" id="invoiceModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-file-invoice me-2"></i>Invoice Pembayaran</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="invoiceContent">
+                        <!-- Invoice content will be loaded here -->
+                    </div>
+                    <hr>
+                    <form action="{{ route('customer.pembayaran.store') }}" method="POST" enctype="multipart/form-data" id="paymentForm">
+                        @csrf
+                        <input type="hidden" name="reservation_id" id="reservationIdInput">
+                        <div class="row g-3">
+                            <div class="col-md-12">
+                                <label class="form-label">Metode Pembayaran</label>
+                                <select name="method" class="form-select" id="paymentMethod" required onchange="toggleProofUpload()">
+                                    <option value="">Pilih metode</option>
+                                    <option value="cash">Cash</option>
+                                    <option value="transfer">Transfer Bank</option>
+                                    <option value="qris">QRIS</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div id="bankInfoDiv" style="display: none;" class="mt-3">
+                            @if($paymentSettings && $paymentSettings->bank_name)
+                            <div class="p-3 bg-light rounded border">
+                                <h6 class="mb-2"><i class="fas fa-university me-2"></i>Informasi Transfer</h6>
+                                <table class="table table-borderless table-sm mb-0">
+                                    <tr><td>Bank</td><td><strong>{{ $paymentSettings->bank_name }}</strong></td></tr>
+                                    <tr><td>No. Rekening</td><td><strong>{{ $paymentSettings->account_number }}</strong></td></tr>
+                                    <tr><td>Atas Nama</td><td><strong>{{ $paymentSettings->account_holder }}</strong></td></tr>
+                                </table>
+                            </div>
+                            @else
+                            <div class="alert alert-warning mb-0">
+                                <i class="fas fa-exclamation-triangle me-1"></i> Informasi rekening bank belum diatur oleh admin.
+                            </div>
+                            @endif
+                        </div>
+
+                        <div id="qrisInfoDiv" style="display: none;" class="mt-3 text-center">
+                            @if($paymentSettings && $paymentSettings->qris_image)
+                                <h6 class="mb-2"><i class="fas fa-qrcode me-2"></i>Scan QRIS</h6>
+                                <img src="{{ asset('storage/' . $paymentSettings->qris_image) }}" alt="QRIS" class="img-fluid rounded border" style="max-height: 280px;">
+                            @else
+                            <div class="alert alert-warning mb-0">
+                                <i class="fas fa-exclamation-triangle me-1"></i> QRIS belum diatur oleh admin.
+                            </div>
+                            @endif
+                        </div>
+
+                        <div class="row g-3 mt-2">
+                            <div class="col-md-12" id="proofUploadDiv" style="display: none;">
+                                <label class="form-label">Bukti Pembayaran</label>
+                                <input type="file" name="proof_image" class="form-control" accept="image/*">
+                                <small class="text-muted">Upload bukti pembayaran untuk Transfer atau QRIS (JPG, PNG, max 2MB)</small>
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <button type="submit" class="btn-submit">
+                                <i class="fas fa-paper-plane me-2"></i> Kirim Pembayaran
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
+
+@push('scripts')
+<script>
+    function showInvoice(reservationId) {
+        // Load invoice content
+        fetch(`/customer/reservasi/${reservationId}/invoice`, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            },
+            credentials: 'same-origin'
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok: ' + response.status);
+                }
+                return response.text();
+            })
+            .then(html => {
+                document.getElementById('invoiceContent').innerHTML = html;
+                document.getElementById('reservationIdInput').value = reservationId;
+                new bootstrap.Modal(document.getElementById('invoiceModal')).show();
+            })
+            .catch(error => {
+                console.error('Error loading invoice:', error);
+                alert('Error loading invoice: ' + error.message);
+            });
+    }
+
+    function toggleProofUpload() {
+        const method = document.getElementById('paymentMethod').value;
+        const proofDiv = document.getElementById('proofUploadDiv');
+        const bankDiv = document.getElementById('bankInfoDiv');
+        const qrisDiv = document.getElementById('qrisInfoDiv');
+
+        if (method === 'transfer') {
+            proofDiv.style.display = 'block';
+            bankDiv.style.display = 'block';
+            qrisDiv.style.display = 'none';
+        } else if (method === 'qris') {
+            proofDiv.style.display = 'block';
+            bankDiv.style.display = 'none';
+            qrisDiv.style.display = 'block';
+        } else {
+            proofDiv.style.display = 'none';
+            bankDiv.style.display = 'none';
+            qrisDiv.style.display = 'none';
+        }
+    }
+</script>
+@endpush

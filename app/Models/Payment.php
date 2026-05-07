@@ -8,6 +8,7 @@ class Payment extends Model
 {
     protected $fillable = [
         'user_id', 'reservation_id', 'total', 'method', 'status',
+        'proof_image', 'payable_type', 'payable_id', 'rejection_reason',
     ];
 
     public function customer()

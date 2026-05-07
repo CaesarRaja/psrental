@@ -8,7 +8,7 @@ class Reservation extends Model
 {
     protected $fillable = [
         'user_id', 'console_type', 'date', 'start_time',
-        'duration', 'total_price', 'status',
+        'duration', 'total_price', 'status', 'extended_duration', 'started_at',
     ];
 
     public function customer()
@@ -24,5 +24,15 @@ class Reservation extends Model
     public function payment()
     {
         return $this->hasOne(Payment::class);
+    }
+
+    public function billingExtensions()
+    {
+        return $this->hasMany(BillingExtension::class);
+    }
+
+    public function foodOrders()
+    {
+        return $this->hasMany(FoodOrder::class);
     }
 }

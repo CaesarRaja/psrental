@@ -22,6 +22,9 @@
             <li><a href="{{ route('admin.pembayaran') }}" class="{{ $active === 'pembayaran' ? 'active' : '' }}">
                 <i class="fas fa-credit-card"></i> Pembayaran
             </a></li>
+            <li><a href="{{ route('admin.payment.settings') }}" class="{{ $active === 'payment_settings' ? 'active' : '' }}">
+                <i class="fas fa-cog"></i> Pengaturan Pembayaran
+            </a></li>
             <li class="nav-label">Makanan & Minuman</li>
             <li><a href="{{ route('admin.makanan') }}" class="{{ $active === 'makanan' ? 'active' : '' }}">
                 <i class="fas fa-utensils"></i> Kelola Stok Makanan

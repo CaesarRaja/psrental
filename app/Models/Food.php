@@ -9,7 +9,7 @@ class Food extends Model
     protected $table = 'foods';
     
     protected $fillable = [
-        'emoji', 'name', 'category', 'price', 'stock',
+        'photo', 'name', 'category', 'price', 'stock', 'status',
     ];
 
     public function orders()

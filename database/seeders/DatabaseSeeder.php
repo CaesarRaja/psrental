@@ -48,16 +48,16 @@ class DatabaseSeeder extends Seeder
 
         // Create Food Items
         $foods = [
-            ['emoji' => '🍔', 'name' => 'Burger', 'category' => 'Makanan', 'price' => 25000, 'stock' => 50],
-            ['emoji' => '🍕', 'name' => 'Pizza Slice', 'category' => 'Makanan', 'price' => 20000, 'stock' => 30],
-            ['emoji' => '🍗', 'name' => 'Chicken Wings', 'category' => 'Makanan', 'price' => 30000, 'stock' => 40],
-            ['emoji' => '🍟', 'name' => 'French Fries', 'category' => 'Snack', 'price' => 15000, 'stock' => 60],
-            ['emoji' => '🥤', 'name' => 'Cola', 'category' => 'Minuman', 'price' => 8000, 'stock' => 100],
-            ['emoji' => '🧃', 'name' => 'Jus Jeruk', 'category' => 'Minuman', 'price' => 12000, 'stock' => 80],
-            ['emoji' => '☕', 'name' => 'Kopi', 'category' => 'Minuman', 'price' => 10000, 'stock' => 50],
-            ['emoji' => '🍿', 'name' => 'Popcorn', 'category' => 'Snack', 'price' => 10000, 'stock' => 70],
-            ['emoji' => '🍦', 'name' => 'Ice Cream', 'category' => 'Snack', 'price' => 8000, 'stock' => 40],
-            ['emoji' => '', 'name' => 'Mie Goreng', 'category' => 'Makanan', 'price' => 18000, 'stock' => 35],
+            ['name' => 'Burger', 'category' => 'Makanan', 'price' => 25000, 'stock' => 50],
+            ['name' => 'Pizza Slice', 'category' => 'Makanan', 'price' => 20000, 'stock' => 30],
+            ['name' => 'Chicken Wings', 'category' => 'Makanan', 'price' => 30000, 'stock' => 40],
+            ['name' => 'French Fries', 'category' => 'Snack', 'price' => 15000, 'stock' => 60],
+            ['name' => 'Cola', 'category' => 'Minuman', 'price' => 8000, 'stock' => 100],
+            ['name' => 'Jus Jeruk', 'category' => 'Minuman', 'price' => 12000, 'stock' => 80],
+            ['name' => 'Kopi', 'category' => 'Minuman', 'price' => 10000, 'stock' => 50],
+            ['name' => 'Popcorn', 'category' => 'Snack', 'price' => 10000, 'stock' => 70],
+            ['name' => 'Ice Cream', 'category' => 'Snack', 'price' => 8000, 'stock' => 40],
+            ['name' => 'Mie Goreng', 'category' => 'Makanan', 'price' => 18000, 'stock' => 35],
         ];
 
         foreach ($foods as $food) {

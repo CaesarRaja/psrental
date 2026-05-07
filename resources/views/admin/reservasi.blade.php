@@ -70,6 +70,7 @@
                             <th>Durasi</th>
                             <th>Total</th>
                             <th>Status</th>
+                            <th>Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -83,10 +84,34 @@
                             <td>{{ $reservation->duration }} jam</td>
                             <td><strong>Rp {{ number_format($reservation->total_price) }}</strong></td>
                             <td><span class="status-badge status-{{ $reservation->status }}">{{ ucfirst($reservation->status) }}</span></td>
+                            <td>
+                                @if($reservation->status === 'pending')
+                                    <form action="{{ route('admin.reservasi.approve', $reservation->id) }}" method="POST" class="d-inline">
+                                        @csrf
+                                        <button type="submit" class="btn btn-sm btn-success mb-1">Approve</button>
+                                    </form>
+                                    <form action="{{ route('admin.reservasi.reject', $reservation->id) }}" method="POST" class="d-inline">
+                                        @csrf
+                                        <button type="submit" class="btn btn-sm btn-danger">Tolak</button>
+                                    </form>
+                                @elseif($reservation->status === 'approved')
+                                    <form action="{{ route('admin.reservasi.start', $reservation->id) }}" method="POST">
+                                        @csrf
+                                        <button type="submit" class="btn btn-sm btn-primary">Mulai</button>
+                                    </form>
+                                @elseif($reservation->status === 'active')
+                                    <form action="{{ route('admin.reservasi.complete', $reservation->id) }}" method="POST">
+                                        @csrf
+                                        <button type="submit" class="btn btn-sm btn-success">Selesai</button>
+                                    </form>
+                                @else
+                                    <span class="text-muted">-</span>
+                                @endif
+                            </td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="8" class="text-center text-muted py-4">Tidak ada data reservasi</td>
+                            <td colspan="9" class="text-center text-muted py-4">Tidak ada data reservasi</td>
                         </tr>
                         @endforelse
                     </tbody>

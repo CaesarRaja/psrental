@@ -16,6 +16,36 @@
 @endsection
 
 @section('content')
+    <div class="stats-grid mb-4">
+        <div class="stat-card">
+            <div class="stat-info">
+                <h6>Pendapatan Hari Ini</h6>
+                <h3>Rp {{ number_format($todayRevenue ?? 0) }}</h3>
+            </div>
+            <div class="stat-icon icon-success">
+                <i class="fas fa-coins"></i>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-info">
+                <h6>Pembayaran Pending</h6>
+                <h3>{{ $pendingPayments ?? 0 }}</h3>
+            </div>
+            <div class="stat-icon icon-warning">
+                <i class="fas fa-clock"></i>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-info">
+                <h6>Pembayaran Berhasil</h6>
+                <h3>{{ $successfulPayments ?? 0 }}</h3>
+            </div>
+            <div class="stat-icon icon-primary">
+                <i class="fas fa-check-circle"></i>
+            </div>
+        </div>
+    </div>
+
     <div class="dashboard-card">
         <div class="card-header-custom">
             <h5><i class="fas fa-credit-card me-2"></i>Daftar Pembayaran</h5>
@@ -28,8 +58,11 @@
                             <th>ID</th>
                             <th>Customer</th>
                             <th>Total</th>
+                            <th>Metode</th>
+                            <th>Bukti</th>
                             <th>Status</th>
                             <th>Tanggal</th>
+                            <th>Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -38,12 +71,38 @@
                             <td><strong>#{{ $payment->id }}</strong></td>
                             <td>{{ $payment->customer->name ?? '-' }}</td>
                             <td><strong>Rp {{ number_format($payment->total) }}</strong></td>
-                            <td><span class="status-badge status-{{ $payment->status }}">{{ ucfirst($payment->status) }}</span></td>
+                            <td>{{ ucfirst($payment->method) }}</td>
+                            <td>
+                                @if($payment->proof_image)
+                                    <a href="{{ route('admin.pembayaran.proof', $payment->id) }}" target="_blank" class="btn btn-sm btn-outline-info">
+                                        <i class="fas fa-image"></i> Lihat
+                                    </a>
+                                @else
+                                    -
+                                @endif
+                            </td>
+                            <td>
+                                <span class="status-badge status-{{ $payment->status }}">{{ ucfirst($payment->status) }}</span>
+                                @if($payment->status === 'rejected' && $payment->rejection_reason)
+                                    <br><small class="text-danger">{{ $payment->rejection_reason }}</small>
+                                @endif
+                            </td>
                             <td>{{ \Carbon\Carbon::parse($payment->created_at)->format('d M Y H:i') }}</td>
+                            <td>
+                                @if($payment->reservation)
+                                    <button class="btn btn-sm btn-outline-primary mb-1" onclick="showInvoice({{ $payment->id }})">
+                                        <i class="fas fa-file-invoice"></i> Invoice
+                                    </button>
+                                @endif
+                                @if($payment->status === 'pending')
+                                    <button class="btn btn-sm btn-success mb-1" onclick="approvePayment({{ $payment->id }})">Approve</button>
+                                    <button class="btn btn-sm btn-danger" onclick="rejectPayment({{ $payment->id }})">Tolak</button>
+                                @endif
+                            </td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="5" class="text-center text-muted py-4">Belum ada pembayaran</td>
+                            <td colspan="8" class="text-center text-muted py-4">Belum ada pembayaran</td>
                         </tr>
                         @endforelse
                     </tbody>
@@ -51,4 +110,231 @@
             </div>
         </div>
     </div>
+
+    <!-- Invoice Modal -->
+    <div class="modal fade" id="invoiceModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Invoice Pembayaran</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="invoiceModalBody">
+                    @foreach($payments as $payment)
+                        @if($payment->reservation)
+                            <div id="invoice-content-{{ $payment->id }}" class="invoice-content" style="display:none;">
+                                <div class="invoice-container-admin">
+                                    <div class="invoice-header-admin">
+                                        <div class="invoice-logo-admin">
+                                            <h3>🕹️ PS Rent Station</h3>
+                                            <p>Invoice Pembayaran Reservasi</p>
+                                        </div>
+                                        <div class="invoice-info-admin">
+                                            <p><strong>Invoice #{{ $payment->reservation->id }}</strong></p>
+                                            <p>Tanggal: {{ \Carbon\Carbon::parse($payment->reservation->date)->format('d M Y') }}</p>
+                                            <p>Waktu: {{ $payment->reservation->start_time }}</p>
+                                        </div>
+                                    </div>
+                                    <div class="invoice-details-admin">
+                                        <div class="customer-info-admin">
+                                            <h5>Informasi Customer</h5>
+                                            <p><strong>Nama:</strong> {{ $payment->customer->name ?? '-' }}</p>
+                                            <p><strong>Email:</strong> {{ $payment->customer->email ?? '-' }}</p>
+                                        </div>
+                                        <div class="reservation-info-admin">
+                                            <h5>Detail Reservasi</h5>
+                                            <table class="invoice-table-admin">
+                                                <tr>
+                                                    <td>Console:</td>
+                                                    <td>{{ $payment->reservation->console_type }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Durasi:</td>
+                                                    <td>{{ $payment->reservation->duration }} jam</td>
+                                                </tr>
+                                                @php
+                                                    $pricePerHour = $payment->reservation->console_type === 'PS4' ? 15000 : ($payment->reservation->console_type === 'PS5' ? 25000 : 35000);
+                                                    $approvedExtensions = $payment->reservation->billingExtensions->where('status', 'approved');
+                                                    $totalExtensionDuration = $approvedExtensions->sum('requested_duration');
+                                                    $totalExtensionPrice = $totalExtensionDuration * ($pricePerHour / 60);
+                                                    $grandTotal = $payment->reservation->total_price + $totalExtensionPrice;
+                                                @endphp
+                                                <tr>
+                                                    <td>Harga per Jam:</td>
+                                                    <td>Rp {{ number_format($pricePerHour) }}</td>
+                                                </tr>
+                                                @if($totalExtensionDuration > 0)
+                                                <tr>
+                                                    <td>Tambahan Waktu:</td>
+                                                    <td>{{ $totalExtensionDuration }} menit</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Harga Tambahan:</td>
+                                                    <td>Rp {{ number_format($totalExtensionPrice) }}</td>
+                                                </tr>
+                                                @endif
+                                                <tr class="total-row-admin">
+                                                    <td><strong>Total Tagihan:</strong></td>
+                                                    <td><strong>Rp {{ number_format($grandTotal) }}</strong></td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <div class="invoice-footer-admin">
+                                        <p>Terima kasih telah menggunakan layanan PS Rent Station!</p>
+                                        <p>Status Pembayaran: <strong>{{ ucfirst($payment->status) }}</strong></p>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+                    @endforeach
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reject Modal -->
+    <div class="modal fade" id="rejectModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Tolak Pembayaran</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="rejectForm">
+                    @csrf
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Alasan Penolakan</label>
+                            <textarea class="form-control" name="reason" rows="3" required placeholder="Jelaskan alasan pembayaran ditolak..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-danger">Tolak Pembayaran</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 @endsection
+
+@push('scripts')
+<script>
+    function showInvoice(paymentId) {
+        document.querySelectorAll('.invoice-content').forEach(el => el.style.display = 'none');
+        const content = document.getElementById('invoice-content-' + paymentId);
+        if (content) {
+            content.style.display = 'block';
+            new bootstrap.Modal(document.getElementById('invoiceModal')).show();
+        }
+    }
+
+    function approvePayment(paymentId) {
+        if (confirm('Apakah Anda yakin ingin menyetujui pembayaran ini?')) {
+            const formData = new FormData();
+            formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+            
+            fetch(`/admin/pembayaran/${paymentId}/confirm`, {
+                method: 'POST',
+                body: formData,
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Terjadi kesalahan');
+                }
+            });
+        }
+    }
+
+    function rejectPayment(paymentId) {
+        document.getElementById('rejectForm').action = `/admin/pembayaran/${paymentId}/cancel`;
+        new bootstrap.Modal(document.getElementById('rejectModal')).show();
+    }
+
+    document.getElementById('rejectForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        
+        fetch(this.action, {
+            method: 'POST',
+            body: formData,
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Terjadi kesalahan');
+            }
+        });
+    });
+</script>
+
+<style>
+.invoice-container-admin {
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fff;
+}
+.invoice-header-admin {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 30px;
+    border-bottom: 2px solid #007bff;
+    padding-bottom: 20px;
+}
+.invoice-logo-admin h3 {
+    margin: 0;
+    color: #0056b3;
+}
+.invoice-info-admin {
+    text-align: right;
+    color: #111;
+}
+.invoice-details-admin {
+    margin-bottom: 30px;
+}
+.customer-info-admin, .reservation-info-admin {
+    margin-bottom: 20px;
+}
+.customer-info-admin h5, .reservation-info-admin h5 {
+    margin-bottom: 10px;
+    color: #111;
+}
+.invoice-container-admin,
+.invoice-container-admin p,
+.invoice-container-admin td,
+.invoice-container-admin h3,
+.invoice-container-admin h5 {
+    color: #111;
+}
+.invoice-table-admin {
+    width: 100%;
+    border-collapse: collapse;
+}
+.invoice-table-admin td {
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+}
+.total-row-admin {
+    background: #f8f9fa;
+    font-weight: bold;
+}
+.invoice-footer-admin {
+    text-align: center;
+    color: #666;
+    border-top: 1px solid #ddd;
+    padding-top: 20px;
+}
+</style>
+@endpush

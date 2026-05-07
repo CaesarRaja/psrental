@@ -36,10 +36,13 @@ Route::middleware(['auth'])->prefix('customer')->name('customer.')->group(functi
     Route::delete('/reservasi/{id}', [App\Http\Controllers\CustomerController::class, 'cancelReservasi'])->name('reservasi.cancel');
     Route::get('/makanan', [App\Http\Controllers\CustomerController::class, 'makanan'])->name('makanan');
     Route::post('/makanan/order', [App\Http\Controllers\CustomerController::class, 'orderMakanan'])->name('makanan.order');
+    Route::delete('/makanan/order/{id}/cancel', [App\Http\Controllers\CustomerController::class, 'cancelFoodOrder'])->name('makanan.order.cancel');
     Route::get('/pembayaran', [App\Http\Controllers\CustomerController::class, 'pembayaran'])->name('pembayaran');
     Route::post('/pembayaran', [App\Http\Controllers\CustomerController::class, 'storePayment'])->name('pembayaran.store');
+    Route::get('/reservasi/{id}/invoice', [App\Http\Controllers\CustomerController::class, 'showInvoice'])->name('reservasi.invoice');
     Route::get('/keluhan', [App\Http\Controllers\CustomerController::class, 'keluhan'])->name('keluhan');
     Route::post('/keluhan', [App\Http\Controllers\CustomerController::class, 'storeKeluhan'])->name('keluhan.store');
+    Route::post('/billing-extension', [App\Http\Controllers\BillingExtensionController::class, 'store'])->name('billing-extension.store');
 });
 
 // Admin Routes (Protected)
@@ -65,10 +68,16 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::get('/pembayaran', [App\Http\Controllers\AdminController::class, 'pembayaran'])->name('pembayaran');
     Route::post('/pembayaran/{id}/confirm', [App\Http\Controllers\AdminController::class, 'confirmPayment'])->name('pembayaran.confirm');
     Route::post('/pembayaran/{id}/cancel', [App\Http\Controllers\AdminController::class, 'cancelPayment'])->name('pembayaran.cancel');
+    Route::get('/pembayaran/{id}/proof', [App\Http\Controllers\AdminController::class, 'downloadProof'])->name('pembayaran.proof');
+
+    // Pengaturan Pembayaran
+    Route::get('/payment-settings', [App\Http\Controllers\AdminController::class, 'paymentSettings'])->name('payment.settings');
+    Route::post('/payment-settings', [App\Http\Controllers\AdminController::class, 'updatePaymentSettings'])->name('payment.settings.update');
 
     // Makanan
     Route::get('/makanan', [App\Http\Controllers\AdminController::class, 'makanan'])->name('makanan');
     Route::post('/makanan', [App\Http\Controllers\AdminController::class, 'storeMakanan'])->name('makanan.store');
+    Route::post('/makanan/{id}', [App\Http\Controllers\AdminController::class, 'updateMakanan'])->name('makanan.update');
     Route::post('/makanan/{id}/stock', [App\Http\Controllers\AdminController::class, 'updateStock'])->name('makanan.stock');
     Route::delete('/makanan/{id}', [App\Http\Controllers\AdminController::class, 'destroyMakanan'])->name('makanan.destroy');
     Route::post('/makanan/order/{id}/update', [App\Http\Controllers\AdminController::class, 'updateFoodOrder'])->name('makanan.order.update');
@@ -76,4 +85,8 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     // Keluhan
     Route::get('/keluhan', [App\Http\Controllers\AdminController::class, 'keluhan'])->name('keluhan');
     Route::post('/keluhan/{id}/response', [App\Http\Controllers\AdminController::class, 'responseKeluhan'])->name('keluhan.response');
+
+    // Billing Extensions
+    Route::post('/billing-extension/{id}/approve', [App\Http\Controllers\BillingExtensionController::class, 'approve'])->name('billing-extension.approve');
+    Route::post('/billing-extension/{id}/reject', [App\Http\Controllers\BillingExtensionController::class, 'reject'])->name('billing-extension.reject');
 });

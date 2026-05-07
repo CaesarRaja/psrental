@@ -10,13 +10,25 @@ use App\Models\Payment;
 use App\Models\Complaint;
 use App\Models\Queue;
 use App\Models\Console;
+use App\Models\BillingExtension;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class AdminController extends Controller
 {
     public function dashboard()
     {
+        // Auto-reset console status yang tidak punya active reservation
+        $activeConsoleTypes = Reservation::where('status', 'active')
+            ->distinct('console_type')
+            ->pluck('console_type')
+            ->toArray();
+        
+        Console::where('status', 'busy')
+            ->whereNotIn('type', $activeConsoleTypes)
+            ->update(['status' => 'available']);
+
         $todayReservations = Reservation::whereDate('created_at', today())->count();
         $activePlaying = Reservation::where('status', 'active')->count();
         $todayRevenue = Reservation::whereDate('created_at', today())
@@ -25,6 +37,7 @@ class AdminController extends Controller
         $totalCustomers = User::where('role', 'customer')->count();
         $newComplaints = Complaint::where('status', 'open')->count();
         $pendingReservations = Reservation::where('status', 'pending')->count();
+        $pendingFoodOrders = FoodOrder::where('status', 'pending')->count();
 
         $consoles = Console::all();
         $availableConsoles = Console::where('status', 'available')->count();
@@ -35,11 +48,18 @@ class AdminController extends Controller
         $newCustomers = User::where('role', 'customer')
             ->whereBetween('created_at', [now()->subWeek(), now()])->count();
 
+        $pendingBillingExtensions = BillingExtension::with('reservation.customer')
+            ->where('status', 'pending')->get();
+
+        $activeReservations = Reservation::with('customer')
+            ->where('status', 'active')->get();
+
         return view('admin.dashboard', compact(
             'todayReservations', 'activePlaying', 'todayRevenue',
             'queueWaiting', 'totalCustomers', 'newComplaints',
-            'pendingReservations', 'consoles', 'availableConsoles',
-            'recentReservations', 'weeklyReservations', 'newCustomers'
+            'pendingReservations', 'pendingFoodOrders', 'consoles', 'availableConsoles',
+            'recentReservations', 'weeklyReservations', 'newCustomers',
+            'pendingBillingExtensions', 'activeReservations'
         ));
     }
 
@@ -86,11 +106,20 @@ class AdminController extends Controller
     public function startReservasi($id)
     {
         $reservation = Reservation::findOrFail($id);
-        $reservation->update(['status' => 'active']);
+        $reservation->update([
+            'status' => 'active',
+            'started_at' => now(),
+        ]);
 
-        // Update console status
-        Console::where('name', 'like', $reservation->console_type . '%')
-            ->where('status', 'available')->first()?->update(['status' => 'busy']);
+        // Update console status for the reservation type
+        Console::where('type', $reservation->console_type)
+            ->where('status', 'available')
+            ->first()?->update(['status' => 'busy']);
+
+        // Mark related queue as serving
+        Queue::where('reservation_id', $reservation->id)
+            ->where('status', 'waiting')
+            ->update(['status' => 'serving']);
 
         return back()->with('success', 'Sesi dimulai.');
     }
@@ -100,29 +129,50 @@ class AdminController extends Controller
         $reservation = Reservation::findOrFail($id);
         $reservation->update(['status' => 'completed']);
 
-        // Create payment
+        // Calculate food order total
+        $foodTotal = FoodOrder::where('reservation_id', $reservation->id)
+            ->whereIn('status', ['approved', 'delivered'])
+            ->sum('total');
+
+        // Create payment including food orders
         Payment::create([
             'user_id' => $reservation->user_id,
             'reservation_id' => $reservation->id,
-            'total' => $reservation->total_price,
+            'total' => $reservation->total_price + $foodTotal,
             'method' => 'cash',
             'status' => 'completed',
         ]);
 
-        // Update console status
-        Console::where('status', 'busy')->first()?->update(['status' => 'available']);
+        // Update console status for the reservation type
+        Console::where('type', $reservation->console_type)
+            ->where('status', 'busy')
+            ->first()?->update(['status' => 'available']);
+
+        // Mark related queue as completed
+        Queue::where('reservation_id', $reservation->id)
+            ->whereIn('status', ['waiting', 'serving'])
+            ->update(['status' => 'completed']);
 
         return back()->with('success', 'Sesi selesai.');
     }
 
     public function antrian()
     {
-        $queue = Queue::where('status', 'waiting')->orderBy('queue_number')->get();
-        $currentQueueNumber = Queue::where('status', 'serving')->first()?->queue_number ?? '00';
+        $queues = Queue::with('customer')
+            ->where('status', 'waiting')
+            ->orderBy('queue_number')
+            ->get();
+
+        $currentServing = Queue::with('customer')
+            ->where('status', 'serving')
+            ->first();
+
         $todayCompleted = Queue::whereDate('created_at', today())
             ->where('status', 'completed')->count();
 
-        return view('admin.antrian', compact('queue', 'currentQueueNumber', 'todayCompleted'));
+        $customers = User::where('role', 'customer')->orderBy('name')->get();
+
+        return view('admin.antrian', compact('queues', 'currentServing', 'todayCompleted', 'customers'));
     }
 
     public function nextQueue()
@@ -181,7 +231,7 @@ class AdminController extends Controller
 
     public function pembayaran(Request $request)
     {
-        $query = Payment::with('customer');
+        $query = Payment::with(['customer', 'reservation.billingExtensions']);
 
         if ($request->status) {
             $query->where('status', $request->status);
@@ -207,14 +257,75 @@ class AdminController extends Controller
     {
         $payment = Payment::findOrFail($id);
         $payment->update(['status' => 'completed']);
-        return back()->with('success', 'Pembayaran dikonfirmasi.');
+
+        // Update reservation status to completed
+        if ($payment->reservation) {
+            $payment->reservation->update(['status' => 'completed']);
+        }
+
+        return response()->json(['success' => true, 'message' => 'Pembayaran dikonfirmasi.']);
     }
 
-    public function cancelPayment($id)
+    public function cancelPayment(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'reason' => 'required|string|max:500',
+        ]);
+
+        $payment = Payment::findOrFail($id);
+        $payment->update([
+            'status' => 'rejected',
+            'rejection_reason' => $validated['reason']
+        ]);
+
+        return response()->json(['success' => true, 'message' => 'Pembayaran ditolak.']);
+    }
+
+    public function downloadProof($id)
     {
         $payment = Payment::findOrFail($id);
-        $payment->update(['status' => 'cancelled']);
-        return back()->with('success', 'Pembayaran dibatalkan.');
+
+        if (!$payment->proof_image) {
+            abort(404);
+        }
+
+        if (!Storage::disk('public')->exists($payment->proof_image)) {
+            abort(404, 'File bukti pembayaran tidak ditemukan.');
+        }
+
+        return Storage::disk('public')->download($payment->proof_image);
+    }
+
+    public function paymentSettings()
+    {
+        $settings = \App\Models\PaymentSetting::first();
+        return view('admin.payment_settings', compact('settings'));
+    }
+
+    public function updatePaymentSettings(Request $request)
+    {
+        $validated = $request->validate([
+            'bank_name' => 'nullable|string|max:100',
+            'account_number' => 'nullable|string|max:50',
+            'account_holder' => 'nullable|string|max:100',
+            'qris_image' => 'nullable|image|max:2048',
+        ]);
+
+        $settings = \App\Models\PaymentSetting::firstOrCreate([]);
+        $data = [
+            'bank_name' => $validated['bank_name'] ?? null,
+            'account_number' => $validated['account_number'] ?? null,
+            'account_holder' => $validated['account_holder'] ?? null,
+        ];
+
+        if ($request->hasFile('qris_image')) {
+            $path = $request->file('qris_image')->store('qris', 'public');
+            $data['qris_image'] = $path;
+        }
+
+        $settings->update($data);
+
+        return back()->with('success', 'Pengaturan pembayaran berhasil diperbarui.');
     }
 
     public function makanan()
@@ -227,15 +338,44 @@ class AdminController extends Controller
     public function storeMakanan(Request $request)
     {
         $validated = $request->validate([
-            'emoji' => 'required|string',
+            'photo' => 'nullable|image|max:2048',
             'name' => 'required|string|max:255',
             'category' => 'required|in:Makanan,Minuman,Snack',
             'price' => 'required|numeric',
-            'stock' => 'required|integer',
+            'stock' => 'required|integer|min:0',
+            'status' => 'required|in:available,unavailable',
         ]);
+
+        if ($request->hasFile('photo')) {
+            $validated['photo'] = $request->file('photo')->store('foods', 'public');
+        }
 
         Food::create($validated);
         return back()->with('success', 'Makanan berhasil ditambahkan.');
+    }
+
+    public function updateMakanan(Request $request, $id)
+    {
+        $food = Food::findOrFail($id);
+
+        $validated = $request->validate([
+            'photo' => 'nullable|image|max:2048',
+            'name' => 'required|string|max:255',
+            'category' => 'required|in:Makanan,Minuman,Snack',
+            'price' => 'required|numeric',
+            'stock' => 'required|integer|min:0',
+            'status' => 'required|in:available,unavailable',
+        ]);
+
+        if ($request->hasFile('photo')) {
+            if ($food->photo && Storage::disk('public')->exists($food->photo)) {
+                Storage::disk('public')->delete($food->photo);
+            }
+            $validated['photo'] = $request->file('photo')->store('foods', 'public');
+        }
+
+        $food->update($validated);
+        return back()->with('success', 'Makanan berhasil diperbarui.');
     }
 
     public function updateStock(Request $request, $id)
@@ -249,18 +389,35 @@ class AdminController extends Controller
 
     public function destroyMakanan($id)
     {
-        Food::findOrFail($id)->delete();
+        $food = Food::findOrFail($id);
+        if ($food->photo && Storage::disk('public')->exists($food->photo)) {
+            Storage::disk('public')->delete($food->photo);
+        }
+        $food->delete();
         return back()->with('success', 'Makanan berhasil dihapus.');
     }
 
     public function updateFoodOrder(Request $request, $id)
     {
         $validated = $request->validate([
-            'status' => 'required|in:preparing,delivered,cancelled',
+            'status' => 'required|in:pending,approved,preparing,delivered,rejected,cancelled',
         ]);
 
         $order = FoodOrder::findOrFail($id);
-        $order->update(['status' => $validated['status']]);
+        $oldStatus = $order->status;
+        $newStatus = $validated['status'];
+
+        // If rejecting a pending/approved order, restore stock
+        if (in_array($newStatus, ['rejected', 'cancelled']) && !in_array($oldStatus, ['rejected', 'cancelled', 'delivered'])) {
+            foreach ($order->items as $item) {
+                $food = Food::find($item['id'] ?? null);
+                if ($food) {
+                    $food->increment('stock', $item['qty'] ?? 1);
+                }
+            }
+        }
+
+        $order->update(['status' => $newStatus]);
 
         return back()->with('success', 'Status pesanan diperbarui.');
     }

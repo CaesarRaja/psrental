@@ -18,10 +18,9 @@ class Queue extends Model
         parent::boot();
 
         static::creating(function ($queue) {
-            $queue->queue_number = str_pad(
-                Queue::whereDate('created_at', today())->count() + 1,
-                3, '0', STR_PAD_LEFT
-            );
+            $lastNumber = (int) (Queue::whereDate('created_at', today())
+                ->max('queue_number') ?? 0);
+            $queue->queue_number = str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
         });
     }
 
