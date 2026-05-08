@@ -70,8 +70,14 @@
     </div>
 
     <div class="dashboard-card mt-4">
-        <div class="card-header-custom">
-            <h5><i class="fas fa-list me-2"></i>Daftar Reservasi Saya</h5>
+        <div class="card-header-custom d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="fas fa-list me-2"></i>Daftar Reservasi Saya</h5>
+            <form action="{{ route('customer.reservasi.destroyAll') }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin ingin menghapus SEMUA reservasi kamu? Tindakan ini tidak dapat dibatalkan.');">
+                @csrf
+                <button type="submit" class="btn btn-sm btn-outline-danger">
+                    <i class="fas fa-trash-alt me-1"></i> Hapus Semua
+                </button>
+            </form>
         </div>
         <div class="card-body-custom p-0">
             <div class="table-responsive">
@@ -105,8 +111,6 @@
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-sm btn-danger">Batal</button>
                                 </form>
-                                @else
-                                <span class="text-muted">-</span>
                                 @endif
                             </td>
                         </tr>

@@ -11,8 +11,10 @@ use App\Models\Complaint;
 use App\Models\Queue;
 use App\Models\Console;
 use App\Models\BillingExtension;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 
 class AdminController extends Controller
@@ -94,12 +96,32 @@ class AdminController extends Controller
             'status' => 'waiting',
         ]);
 
+        NotificationService::notifyCustomer(
+            $reservation->user_id,
+            'Reservasi Disetujui',
+            'Reservasi kamu untuk ' . $reservation->console_type . ' pada ' . $reservation->date . ' telah disetujui.',
+            route('customer.reservasi'),
+            'reservation',
+            $reservation->id
+        );
+
         return back()->with('success', 'Reservasi disetujui.');
     }
 
     public function rejectReservasi($id)
     {
-        Reservation::findOrFail($id)->update(['status' => 'rejected']);
+        $reservation = Reservation::findOrFail($id);
+        $reservation->update(['status' => 'rejected']);
+
+        NotificationService::notifyCustomer(
+            $reservation->user_id,
+            'Reservasi Ditolak',
+            'Reservasi kamu untuk ' . $reservation->console_type . ' pada ' . $reservation->date . ' ditolak.',
+            route('customer.reservasi'),
+            'reservation',
+            $reservation->id
+        );
+
         return back()->with('success', 'Reservasi ditolak.');
     }
 
@@ -120,6 +142,15 @@ class AdminController extends Controller
         Queue::where('reservation_id', $reservation->id)
             ->where('status', 'waiting')
             ->update(['status' => 'serving']);
+
+        NotificationService::notifyCustomer(
+            $reservation->user_id,
+            'Sesi Dimulai',
+            'Sesi bermain kamu di ' . $reservation->console_type . ' telah dimulai. Selamat bermain!',
+            route('customer.dashboard'),
+            'reservation',
+            $reservation->id
+        );
 
         return back()->with('success', 'Sesi dimulai.');
     }
@@ -152,6 +183,15 @@ class AdminController extends Controller
         Queue::where('reservation_id', $reservation->id)
             ->whereIn('status', ['waiting', 'serving'])
             ->update(['status' => 'completed']);
+
+        NotificationService::notifyCustomer(
+            $reservation->user_id,
+            'Sesi Selesai',
+            'Sesi bermain kamu telah selesai. Silakan lakukan pembayaran.',
+            route('customer.pembayaran'),
+            'reservation',
+            $reservation->id
+        );
 
         return back()->with('success', 'Sesi selesai.');
     }
@@ -263,6 +303,15 @@ class AdminController extends Controller
             $payment->reservation->update(['status' => 'completed']);
         }
 
+        NotificationService::notifyCustomer(
+            $payment->user_id,
+            'Pembayaran Dikonfirmasi',
+            'Pembayaran kamu senilai Rp ' . number_format($payment->total) . ' telah dikonfirmasi.',
+            route('customer.pembayaran'),
+            'payment',
+            $payment->id
+        );
+
         return response()->json(['success' => true, 'message' => 'Pembayaran dikonfirmasi.']);
     }
 
@@ -277,6 +326,15 @@ class AdminController extends Controller
             'status' => 'rejected',
             'rejection_reason' => $validated['reason']
         ]);
+
+        NotificationService::notifyCustomer(
+            $payment->user_id,
+            'Pembayaran Ditolak',
+            'Pembayaran kamu ditolak. Alasan: ' . $validated['reason'],
+            route('customer.pembayaran'),
+            'payment',
+            $payment->id
+        );
 
         return response()->json(['success' => true, 'message' => 'Pembayaran ditolak.']);
     }
@@ -419,6 +477,24 @@ class AdminController extends Controller
 
         $order->update(['status' => $newStatus]);
 
+        $statusLabels = [
+            'approved' => 'diterima',
+            'preparing' => 'sedang diproses',
+            'delivered' => 'selesai dan diantar',
+            'rejected' => 'ditolak',
+            'cancelled' => 'dibatalkan',
+        ];
+        $label = $statusLabels[$newStatus] ?? $newStatus;
+
+        NotificationService::notifyCustomer(
+            $order->user_id,
+            'Status Pesanan Diperbarui',
+            'Pesanan makanan kamu telah ' . $label . '.',
+            route('customer.makanan'),
+            'food_order',
+            $order->id
+        );
+
         return back()->with('success', 'Status pesanan diperbarui.');
     }
 
@@ -448,11 +524,219 @@ class AdminController extends Controller
             'status' => 'required|in:resolved,in_progress,closed',
         ]);
 
-        Complaint::findOrFail($id)->update([
+        $complaint = Complaint::findOrFail($id);
+        $complaint->update([
             'response' => $validated['response'],
             'status' => $validated['status'],
         ]);
 
+        NotificationService::notifyCustomer(
+            $complaint->user_id,
+            'Keluhan Direspons',
+            'Admin telah merespons keluhan kamu: ' . $complaint->subject,
+            route('customer.keluhan'),
+            'complaint',
+            $complaint->id
+        );
+
         return back()->with('success', 'Respon berhasil dikirim.');
+    }
+
+    // Customer Management
+    public function customers(Request $request)
+    {
+        $search = $request->input('search');
+        $query = User::where('role', 'customer');
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', '%' . $search . '%')
+                  ->orWhere('email', 'like', '%' . $search . '%')
+                  ->orWhere('phone', 'like', '%' . $search . '%');
+            });
+        }
+
+        $customers = $query->latest()->paginate(15);
+        return view('admin.customers.index', compact('customers', 'search'));
+    }
+
+    public function editCustomer($id)
+    {
+        $customer = User::where('role', 'customer')->findOrFail($id);
+        return view('admin.customers.edit', compact('customer'));
+    }
+
+    public function updateCustomer(Request $request, $id)
+    {
+        $customer = User::where('role', 'customer')->findOrFail($id);
+
+        $rules = [
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users,email,' . $customer->id,
+            'phone' => 'nullable|string|max:20',
+            'address' => 'nullable|string|max:500',
+        ];
+
+        if ($request->filled('password')) {
+            $rules['password'] = 'required|string|min:8|confirmed';
+        }
+
+        $validated = $request->validate($rules);
+
+        $updateData = [
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'phone' => $validated['phone'] ?? null,
+            'address' => $validated['address'] ?? null,
+        ];
+
+        if ($request->filled('password')) {
+            $updateData['password'] = Hash::make($validated['password']);
+        }
+
+        $customer->update($updateData);
+
+        return redirect()->route('admin.customers')
+            ->with('success', 'Data customer berhasil diperbarui.');
+    }
+
+    public function destroyCustomer($id)
+    {
+        $customer = User::where('role', 'customer')->findOrFail($id);
+
+        // Delete related data
+        $customer->reservations()->delete();
+        $customer->foodOrders()->delete();
+        $customer->complaints()->delete();
+        $customer->payments()->delete();
+
+        $customer->delete();
+
+        return redirect()->route('admin.customers')
+            ->with('success', 'Akun customer berhasil dihapus.');
+    }
+
+    public function destroyReservasi($id)
+    {
+        $reservation = Reservation::findOrFail($id);
+
+        // Delete related data
+        if ($reservation->payment && $reservation->payment->proof_image && Storage::disk('public')->exists($reservation->payment->proof_image)) {
+            Storage::disk('public')->delete($reservation->payment->proof_image);
+        }
+        $reservation->payment()->delete();
+        $reservation->queue()->delete();
+        $reservation->billingExtensions()->delete();
+        $reservation->foodOrders()->delete();
+        $reservation->delete();
+
+        return back()->with('success', 'Reservasi berhasil dihapus.');
+    }
+
+    public function destroyPembayaran($id)
+    {
+        $payment = Payment::findOrFail($id);
+
+        if ($payment->proof_image && Storage::disk('public')->exists($payment->proof_image)) {
+            Storage::disk('public')->delete($payment->proof_image);
+        }
+        $payment->delete();
+
+        return back()->with('success', 'Pembayaran berhasil dihapus.');
+    }
+
+    public function destroyFoodOrder($id)
+    {
+        $order = FoodOrder::findOrFail($id);
+
+        // Restore stock if order was not rejected/cancelled/delivered
+        if (!in_array($order->status, ['rejected', 'cancelled', 'delivered'])) {
+            foreach ($order->items as $item) {
+                $food = Food::find($item['id'] ?? null);
+                if ($food) {
+                    $food->increment('stock', $item['qty'] ?? 1);
+                }
+            }
+        }
+
+        $order->delete();
+
+        return back()->with('success', 'Pesanan makanan berhasil dihapus.');
+    }
+
+    public function destroyKeluhan($id)
+    {
+        $complaint = Complaint::findOrFail($id);
+
+        if ($complaint->attachment && Storage::disk('public')->exists($complaint->attachment)) {
+            Storage::disk('public')->delete($complaint->attachment);
+        }
+        $complaint->delete();
+
+        return back()->with('success', 'Keluhan berhasil dihapus.');
+    }
+
+    public function destroyAllReservasi()
+    {
+        $reservations = Reservation::all();
+
+        foreach ($reservations as $reservation) {
+            if ($reservation->payment && $reservation->payment->proof_image && Storage::disk('public')->exists($reservation->payment->proof_image)) {
+                Storage::disk('public')->delete($reservation->payment->proof_image);
+            }
+        }
+
+        Payment::whereIn('reservation_id', $reservations->pluck('id'))->delete();
+        Queue::whereIn('reservation_id', $reservations->pluck('id'))->delete();
+        \App\Models\BillingExtension::whereIn('reservation_id', $reservations->pluck('id'))->delete();
+        FoodOrder::whereIn('reservation_id', $reservations->pluck('id'))->delete();
+        Reservation::query()->delete();
+
+        return back()->with('success', 'Semua reservasi berhasil dihapus.');
+    }
+
+    public function destroyAllPembayaran()
+    {
+        $payments = Payment::whereNotNull('proof_image')->get();
+        foreach ($payments as $payment) {
+            if (Storage::disk('public')->exists($payment->proof_image)) {
+                Storage::disk('public')->delete($payment->proof_image);
+            }
+        }
+
+        Payment::query()->delete();
+
+        return back()->with('success', 'Semua pembayaran berhasil dihapus.');
+    }
+
+    public function destroyAllFoodOrders()
+    {
+        $orders = FoodOrder::whereNotIn('status', ['rejected', 'cancelled', 'delivered'])->get();
+        foreach ($orders as $order) {
+            foreach ($order->items as $item) {
+                $food = Food::find($item['id'] ?? null);
+                if ($food) {
+                    $food->increment('stock', $item['qty'] ?? 1);
+                }
+            }
+        }
+
+        FoodOrder::query()->delete();
+
+        return back()->with('success', 'Semua pesanan makanan berhasil dihapus.');
+    }
+
+    public function destroyAllKeluhan()
+    {
+        $complaints = Complaint::whereNotNull('attachment')->get();
+        foreach ($complaints as $complaint) {
+            if (Storage::disk('public')->exists($complaint->attachment)) {
+                Storage::disk('public')->delete($complaint->attachment);
+            }
+        }
+
+        Complaint::query()->delete();
+
+        return back()->with('success', 'Semua keluhan berhasil dihapus.');
     }
 }

@@ -47,8 +47,14 @@
     </div>
 
     <div class="dashboard-card mb-4">
-        <div class="card-header-custom">
-            <h5><i class="fas fa-gamepad me-2"></i>Reservasi yang Perlu Dibayar</h5>
+        <div class="card-header-custom d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="fas fa-gamepad me-2"></i>Reservasi yang Perlu Dibayar</h5>
+            <form action="{{ route('customer.pembayaran.destroyAll') }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin ingin menghapus SEMUA pembayaran kamu? Tindakan ini tidak dapat dibatalkan.');">
+                @csrf
+                <button type="submit" class="btn btn-sm btn-outline-danger">
+                    <i class="fas fa-trash-alt me-1"></i> Hapus Semua
+                </button>
+            </form>
         </div>
         <div class="card-body-custom p-0">
             <div class="table-responsive">
@@ -95,22 +101,24 @@
                                 @endif
                             </td>
                             <td>
-                                @if(!$reservation->payment || $reservation->payment->status === 'cancelled')
-                                <button class="btn btn-sm btn-primary" onclick="showInvoice({{ $reservation->id }})">
-                                    <i class="fas fa-credit-card"></i> Bayar
-                                </button>
-                                @elseif($reservation->payment->status === 'pending')
-                                <span class="badge bg-warning text-dark"><i class="fas fa-clock me-1"></i> Menunggu</span>
-                                @elseif($reservation->payment->status === 'rejected')
-                                <div>
-                                    <span class="badge bg-danger"><i class="fas fa-times me-1"></i> Ditolak</span>
-                                    @if($reservation->payment->rejection_reason)
-                                    <br><small class="text-danger">{{ $reservation->payment->rejection_reason }}</small>
+                                <div class="d-flex flex-wrap gap-1 align-items-start">
+                                    @if(!$reservation->payment || $reservation->payment->status === 'cancelled')
+                                    <button class="btn btn-sm btn-primary" onclick="showInvoice({{ $reservation->id }})">
+                                        <i class="fas fa-credit-card"></i> Bayar
+                                    </button>
+                                    @elseif($reservation->payment->status === 'pending')
+                                    <span class="badge bg-warning text-dark"><i class="fas fa-clock me-1"></i> Menunggu</span>
+                                    @elseif($reservation->payment->status === 'rejected')
+                                    <div>
+                                        <span class="badge bg-danger"><i class="fas fa-times me-1"></i> Ditolak</span>
+                                        @if($reservation->payment->rejection_reason)
+                                        <br><small class="text-danger">{{ $reservation->payment->rejection_reason }}</small>
+                                        @endif
+                                    </div>
+                                    @else
+                                    <span class="badge bg-success"><i class="fas fa-check me-1"></i> Lunas</span>
                                     @endif
                                 </div>
-                                @else
-                                <span class="badge bg-success"><i class="fas fa-check me-1"></i> Lunas</span>
-                                @endif
                             </td>
                         </tr>
                         @empty

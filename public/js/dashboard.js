@@ -26,14 +26,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Notification Click
-    const notificationBtn = document.querySelector('.notification-btn');
-    if (notificationBtn) {
-        notificationBtn.addEventListener('click', function() {
-            showToast('Kamu memiliki 3 notifikasi baru', 'info');
-        });
-    }
-
     // Auto-refresh for queue system
     const queueNumber = document.getElementById('currentQueueNumber');
     if (queueNumber) {
@@ -93,3 +85,95 @@ function updateConsoleStatus(consoleId, status) {
         showToast('Terjadi kesalahan', 'danger');
     });
 }
+
+// ===== Notification System =====
+document.addEventListener('DOMContentLoaded', function() {
+    const notificationToggle = document.getElementById('notificationToggle');
+    const notificationDropdown = document.getElementById('notificationDropdown');
+
+    if (notificationToggle && notificationDropdown) {
+        // Toggle dropdown
+        notificationToggle.addEventListener('click', function(e) {
+            e.stopPropagation();
+            notificationDropdown.classList.toggle('active');
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!notificationDropdown.contains(e.target) && !notificationToggle.contains(e.target)) {
+                notificationDropdown.classList.remove('active');
+            }
+        });
+
+        // Mark individual notification as read
+        document.querySelectorAll('.notification-item').forEach(item => {
+            item.addEventListener('click', function(e) {
+                const id = this.dataset.id;
+                const link = this.dataset.link;
+
+                const navigate = () => {
+                    if (link) {
+                        window.location.href = link;
+                    }
+                };
+
+                if (!this.classList.contains('read')) {
+                    fetch(`/notifications/${id}/read`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                            'Accept': 'application/json',
+                        }
+                    })
+                    .then(() => {
+                        this.classList.remove('unread');
+                        this.classList.add('read');
+                        const dot = this.querySelector('.notification-dot');
+                        if (dot) dot.remove();
+
+                        // Update badge count
+                        const badge = notificationToggle.querySelector('.notification-badge');
+                        if (badge) {
+                            const count = parseInt(badge.textContent) - 1;
+                            if (count > 0) {
+                                badge.textContent = count;
+                            } else {
+                                badge.remove();
+                            }
+                        }
+                    })
+                    .finally(navigate);
+                } else {
+                    navigate();
+                }
+            });
+        });
+
+        // Mark all as read
+        const markAllBtn = document.getElementById('markAllRead');
+        if (markAllBtn) {
+            markAllBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                fetch('/notifications/read-all', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                        'Accept': 'application/json',
+                    }
+                })
+                .then(() => {
+                    document.querySelectorAll('.notification-item.unread').forEach(item => {
+                        item.classList.remove('unread');
+                        item.classList.add('read');
+                        const dot = item.querySelector('.notification-dot');
+                        if (dot) dot.remove();
+                    });
+                    const badge = notificationToggle.querySelector('.notification-badge');
+                    if (badge) badge.remove();
+                    markAllBtn.remove();
+                })
+                .catch(() => {});
+            });
+        }
+    }
+});

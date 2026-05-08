@@ -13,10 +13,7 @@
             <p class="text-muted mb-0">Kelola sistem rental PlayStation kamu</p>
         </div>
         <div class="header-actions">
-            <div class="notification-btn">
-                <i class="fas fa-bell"></i>
-                <span class="notification-badge">{{ $pendingReservations ?? 0 }}</span>
-            </div>
+            @include('partials.notifications')
             <a href="{{ route('logout') }}" class="btn btn-sm btn-outline-danger">
                 <i class="fas fa-sign-out-alt"></i> Logout
             </a>
@@ -151,16 +148,18 @@
                             </td>
                             <td><strong>Rp {{ number_format($order->total) }}</strong></td>
                             <td>
-                                <form method="POST" action="{{ route('admin.makanan.order.update', $order->id) }}" class="d-inline">
-                                    @csrf
-                                    <input type="hidden" name="status" value="approved">
-                                    <button type="submit" class="btn btn-sm btn-success me-1"><i class="fas fa-check"></i> Terima</button>
-                                </form>
-                                <form method="POST" action="{{ route('admin.makanan.order.update', $order->id) }}" class="d-inline">
-                                    @csrf
-                                    <input type="hidden" name="status" value="rejected">
-                                    <button type="submit" class="btn btn-sm btn-danger"><i class="fas fa-times"></i> Tolak</button>
-                                </form>
+                                <div class="d-flex flex-wrap gap-1">
+                                    <form method="POST" action="{{ route('admin.makanan.order.update', $order->id) }}" class="d-inline">
+                                        @csrf
+                                        <input type="hidden" name="status" value="approved">
+                                        <button type="submit" class="btn btn-sm btn-success"><i class="fas fa-check"></i> Terima</button>
+                                    </form>
+                                    <form method="POST" action="{{ route('admin.makanan.order.update', $order->id) }}" class="d-inline">
+                                        @csrf
+                                        <input type="hidden" name="status" value="rejected">
+                                        <button type="submit" class="btn btn-sm btn-danger"><i class="fas fa-times"></i> Tolak</button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                         @endforeach
@@ -198,15 +197,17 @@
                             <td>#{{ $extension->reservation->id }}</td>
                             <td>{{ $extension->requested_duration }} menit</td>
                             <td>
-                                <form method="POST" action="{{ route('admin.billing-extension.approve', $extension->id) }}" class="d-inline">
-                                    @csrf
-                                    <button type="submit" class="btn btn-sm btn-success me-1">
-                                        <i class="fas fa-check"></i> Approve
+                                <div class="d-flex flex-wrap gap-1">
+                                    <form method="POST" action="{{ route('admin.billing-extension.approve', $extension->id) }}" class="d-inline">
+                                        @csrf
+                                        <button type="submit" class="btn btn-sm btn-success">
+                                            <i class="fas fa-check"></i> Approve
+                                        </button>
+                                    </form>
+                                    <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#rejectModal{{ $extension->id }}">
+                                        <i class="fas fa-times"></i> Reject
                                     </button>
-                                </form>
-                                <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#rejectModal{{ $extension->id }}">
-                                    <i class="fas fa-times"></i> Reject
-                                </button>
+                                </div>
                             </td>
                         </tr>
                         <!-- Reject Modal -->

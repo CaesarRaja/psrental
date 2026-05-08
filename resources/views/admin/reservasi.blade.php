@@ -53,9 +53,17 @@
     </div>
 
     <div class="dashboard-card">
-        <div class="card-header-custom">
-            <h5><i class="fas fa-list me-2"></i>Daftar Reservasi</h5>
-            <span class="badge bg-primary">{{ $reservations->total() ?? 0 }} Total</span>
+        <div class="card-header-custom d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-2">
+                <h5 class="mb-0"><i class="fas fa-list me-2"></i>Daftar Reservasi</h5>
+                <span class="badge bg-primary">{{ $reservations->total() ?? 0 }} Total</span>
+            </div>
+            <form action="{{ route('admin.reservasi.destroyAll') }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin ingin menghapus SEMUA reservasi? Tindakan ini tidak dapat dibatalkan.');">
+                @csrf
+                <button type="submit" class="btn btn-sm btn-outline-danger">
+                    <i class="fas fa-trash-alt me-1"></i> Hapus Semua
+                </button>
+            </form>
         </div>
         <div class="card-body-custom p-0">
             <div class="table-responsive">
@@ -85,28 +93,28 @@
                             <td><strong>Rp {{ number_format($reservation->total_price) }}</strong></td>
                             <td><span class="status-badge status-{{ $reservation->status }}">{{ ucfirst($reservation->status) }}</span></td>
                             <td>
-                                @if($reservation->status === 'pending')
-                                    <form action="{{ route('admin.reservasi.approve', $reservation->id) }}" method="POST" class="d-inline">
-                                        @csrf
-                                        <button type="submit" class="btn btn-sm btn-success mb-1">Approve</button>
-                                    </form>
-                                    <form action="{{ route('admin.reservasi.reject', $reservation->id) }}" method="POST" class="d-inline">
-                                        @csrf
-                                        <button type="submit" class="btn btn-sm btn-danger">Tolak</button>
-                                    </form>
-                                @elseif($reservation->status === 'approved')
-                                    <form action="{{ route('admin.reservasi.start', $reservation->id) }}" method="POST">
-                                        @csrf
-                                        <button type="submit" class="btn btn-sm btn-primary">Mulai</button>
-                                    </form>
-                                @elseif($reservation->status === 'active')
-                                    <form action="{{ route('admin.reservasi.complete', $reservation->id) }}" method="POST">
-                                        @csrf
-                                        <button type="submit" class="btn btn-sm btn-success">Selesai</button>
-                                    </form>
-                                @else
-                                    <span class="text-muted">-</span>
-                                @endif
+                                <div class="d-flex flex-wrap gap-1">
+                                    @if($reservation->status === 'pending')
+                                        <form action="{{ route('admin.reservasi.approve', $reservation->id) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            <button type="submit" class="btn btn-sm btn-success">Approve</button>
+                                        </form>
+                                        <form action="{{ route('admin.reservasi.reject', $reservation->id) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            <button type="submit" class="btn btn-sm btn-danger">Tolak</button>
+                                        </form>
+                                    @elseif($reservation->status === 'approved')
+                                        <form action="{{ route('admin.reservasi.start', $reservation->id) }}" method="POST">
+                                            @csrf
+                                            <button type="submit" class="btn btn-sm btn-primary">Mulai</button>
+                                        </form>
+                                    @elseif($reservation->status === 'active')
+                                        <form action="{{ route('admin.reservasi.complete', $reservation->id) }}" method="POST">
+                                            @csrf
+                                            <button type="submit" class="btn btn-sm btn-success">Selesai</button>
+                                        </form>
+                                    @endif
+                                </div>
                             </td>
                         </tr>
                         @empty

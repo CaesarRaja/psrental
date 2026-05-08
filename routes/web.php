@@ -28,21 +28,38 @@ Route::post('/register', [App\Http\Controllers\AuthController::class, 'register'
 
 Route::get('/logout', [App\Http\Controllers\AuthController::class, 'logout'])->name('logout');
 
+// Notification Routes (Protected)
+Route::middleware(['auth'])->group(function () {
+    Route::get('/notifications', [App\Http\Controllers\NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/{id}/read', [App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('notifications.read');
+    Route::post('/notifications/read-all', [App\Http\Controllers\NotificationController::class, 'markAllAsRead'])->name('notifications.readAll');
+});
+
 // Customer Routes (Protected)
 Route::middleware(['auth'])->prefix('customer')->name('customer.')->group(function () {
     Route::get('/dashboard', [App\Http\Controllers\CustomerController::class, 'dashboard'])->name('dashboard');
     Route::get('/reservasi', [App\Http\Controllers\CustomerController::class, 'reservasi'])->name('reservasi');
     Route::post('/reservasi', [App\Http\Controllers\CustomerController::class, 'storeReservasi'])->name('reservasi.store');
     Route::delete('/reservasi/{id}', [App\Http\Controllers\CustomerController::class, 'cancelReservasi'])->name('reservasi.cancel');
+    Route::delete('/reservasi/{id}/destroy', [App\Http\Controllers\CustomerController::class, 'destroyReservasi'])->name('reservasi.destroy');
+    Route::post('/reservasi/delete-all', [App\Http\Controllers\CustomerController::class, 'destroyAllReservasi'])->name('reservasi.destroyAll');
     Route::get('/makanan', [App\Http\Controllers\CustomerController::class, 'makanan'])->name('makanan');
     Route::post('/makanan/order', [App\Http\Controllers\CustomerController::class, 'orderMakanan'])->name('makanan.order');
     Route::delete('/makanan/order/{id}/cancel', [App\Http\Controllers\CustomerController::class, 'cancelFoodOrder'])->name('makanan.order.cancel');
     Route::get('/pembayaran', [App\Http\Controllers\CustomerController::class, 'pembayaran'])->name('pembayaran');
     Route::post('/pembayaran', [App\Http\Controllers\CustomerController::class, 'storePayment'])->name('pembayaran.store');
+    Route::delete('/pembayaran/{id}', [App\Http\Controllers\CustomerController::class, 'destroyPembayaran'])->name('pembayaran.destroy');
+    Route::post('/pembayaran/delete-all', [App\Http\Controllers\CustomerController::class, 'destroyAllPembayaran'])->name('pembayaran.destroyAll');
     Route::get('/reservasi/{id}/invoice', [App\Http\Controllers\CustomerController::class, 'showInvoice'])->name('reservasi.invoice');
     Route::get('/keluhan', [App\Http\Controllers\CustomerController::class, 'keluhan'])->name('keluhan');
     Route::post('/keluhan', [App\Http\Controllers\CustomerController::class, 'storeKeluhan'])->name('keluhan.store');
+    Route::delete('/keluhan/{id}', [App\Http\Controllers\CustomerController::class, 'destroyKeluhan'])->name('keluhan.destroy');
+    Route::post('/keluhan/delete-all', [App\Http\Controllers\CustomerController::class, 'destroyAllKeluhan'])->name('keluhan.destroyAll');
     Route::post('/billing-extension', [App\Http\Controllers\BillingExtensionController::class, 'store'])->name('billing-extension.store');
+
+    // Profile
+    Route::get('/profile', [App\Http\Controllers\CustomerController::class, 'profile'])->name('profile');
+    Route::post('/profile', [App\Http\Controllers\CustomerController::class, 'updateProfile'])->name('profile.update');
 });
 
 // Admin Routes (Protected)
@@ -55,6 +72,8 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::post('/reservasi/{id}/reject', [App\Http\Controllers\AdminController::class, 'rejectReservasi'])->name('reservasi.reject');
     Route::post('/reservasi/{id}/start', [App\Http\Controllers\AdminController::class, 'startReservasi'])->name('reservasi.start');
     Route::post('/reservasi/{id}/complete', [App\Http\Controllers\AdminController::class, 'completeReservasi'])->name('reservasi.complete');
+    Route::delete('/reservasi/{id}', [App\Http\Controllers\AdminController::class, 'destroyReservasi'])->name('reservasi.destroy');
+    Route::post('/reservasi/delete-all', [App\Http\Controllers\AdminController::class, 'destroyAllReservasi'])->name('reservasi.destroyAll');
 
     // Antrian
     Route::get('/antrian', [App\Http\Controllers\AdminController::class, 'antrian'])->name('antrian');
@@ -69,6 +88,8 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::post('/pembayaran/{id}/confirm', [App\Http\Controllers\AdminController::class, 'confirmPayment'])->name('pembayaran.confirm');
     Route::post('/pembayaran/{id}/cancel', [App\Http\Controllers\AdminController::class, 'cancelPayment'])->name('pembayaran.cancel');
     Route::get('/pembayaran/{id}/proof', [App\Http\Controllers\AdminController::class, 'downloadProof'])->name('pembayaran.proof');
+    Route::delete('/pembayaran/{id}', [App\Http\Controllers\AdminController::class, 'destroyPembayaran'])->name('pembayaran.destroy');
+    Route::post('/pembayaran/delete-all', [App\Http\Controllers\AdminController::class, 'destroyAllPembayaran'])->name('pembayaran.destroyAll');
 
     // Pengaturan Pembayaran
     Route::get('/payment-settings', [App\Http\Controllers\AdminController::class, 'paymentSettings'])->name('payment.settings');
@@ -81,10 +102,20 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::post('/makanan/{id}/stock', [App\Http\Controllers\AdminController::class, 'updateStock'])->name('makanan.stock');
     Route::delete('/makanan/{id}', [App\Http\Controllers\AdminController::class, 'destroyMakanan'])->name('makanan.destroy');
     Route::post('/makanan/order/{id}/update', [App\Http\Controllers\AdminController::class, 'updateFoodOrder'])->name('makanan.order.update');
+    Route::delete('/makanan/order/{id}', [App\Http\Controllers\AdminController::class, 'destroyFoodOrder'])->name('makanan.order.destroy');
+    Route::post('/makanan/orders/delete-all', [App\Http\Controllers\AdminController::class, 'destroyAllFoodOrders'])->name('makanan.orders.destroyAll');
 
     // Keluhan
     Route::get('/keluhan', [App\Http\Controllers\AdminController::class, 'keluhan'])->name('keluhan');
     Route::post('/keluhan/{id}/response', [App\Http\Controllers\AdminController::class, 'responseKeluhan'])->name('keluhan.response');
+    Route::delete('/keluhan/{id}', [App\Http\Controllers\AdminController::class, 'destroyKeluhan'])->name('keluhan.destroy');
+    Route::post('/keluhan/delete-all', [App\Http\Controllers\AdminController::class, 'destroyAllKeluhan'])->name('keluhan.destroyAll');
+
+    // Customer Management
+    Route::get('/customers', [App\Http\Controllers\AdminController::class, 'customers'])->name('customers');
+    Route::get('/customers/{id}/edit', [App\Http\Controllers\AdminController::class, 'editCustomer'])->name('customers.edit');
+    Route::post('/customers/{id}', [App\Http\Controllers\AdminController::class, 'updateCustomer'])->name('customers.update');
+    Route::delete('/customers/{id}', [App\Http\Controllers\AdminController::class, 'destroyCustomer'])->name('customers.destroy');
 
     // Billing Extensions
     Route::post('/billing-extension/{id}/approve', [App\Http\Controllers\BillingExtensionController::class, 'approve'])->name('billing-extension.approve');

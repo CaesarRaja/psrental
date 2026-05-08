@@ -20,6 +20,9 @@
 
 @section('content')
     <div class="dashboard-card">
+        <div class="card-header-custom d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="fas fa-utensils me-2"></i>Kelola Stok Makanan</h5>
+        </div>
         <div class="card-body-custom p-0">
             <div class="table-responsive">
                 <table class="table-custom">
@@ -58,16 +61,18 @@
                                 @endif
                             </td>
                             <td>
-                                <button class="btn btn-sm btn-outline-primary me-1" data-bs-toggle="modal" data-bs-target="#editFoodModal{{ $food->id }}">
-                                    <i class="fas fa-edit"></i> Edit
-                                </button>
-                                <form method="POST" action="{{ route('admin.makanan.destroy', $food->id) }}" class="d-inline" onsubmit="return confirm('Hapus makanan ini?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-outline-danger">
-                                        <i class="fas fa-trash"></i> Hapus
+                                <div class="d-flex flex-wrap gap-1">
+                                    <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editFoodModal{{ $food->id }}">
+                                        <i class="fas fa-edit"></i> Edit
                                     </button>
-                                </form>
+                                    <form method="POST" action="{{ route('admin.makanan.destroy', $food->id) }}" class="d-inline" onsubmit="return confirm('Hapus makanan ini?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                            <i class="fas fa-trash"></i> Hapus
+                                        </button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                         @empty
@@ -82,8 +87,14 @@
     </div>
 
     <div class="dashboard-card mt-4">
-        <div class="card-header-custom">
-            <h5><i class="fas fa-shopping-bag me-2"></i>Pesanan Makanan Customer</h5>
+        <div class="card-header-custom d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="fas fa-shopping-bag me-2"></i>Pesanan Makanan Customer</h5>
+            <form action="{{ route('admin.makanan.orders.destroyAll') }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin ingin menghapus SEMUA pesanan makanan? Tindakan ini tidak dapat dibatalkan.');">
+                @csrf
+                <button type="submit" class="btn btn-sm btn-outline-danger">
+                    <i class="fas fa-trash-alt me-1"></i> Hapus Semua
+                </button>
+            </form>
         </div>
         <div class="card-body-custom p-0">
             <div class="table-responsive">
@@ -136,32 +147,32 @@
                             </td>
                             <td>{{ \Carbon\Carbon::parse($order->created_at)->format('d M Y H:i') }}</td>
                             <td>
-                                @if($order->status === 'pending')
-                                    <form method="POST" action="{{ route('admin.makanan.order.update', $order->id) }}" class="d-inline">
-                                        @csrf
-                                        <input type="hidden" name="status" value="approved">
-                                        <button type="submit" class="btn btn-sm btn-success me-1"><i class="fas fa-check"></i> Terima</button>
-                                    </form>
-                                    <form method="POST" action="{{ route('admin.makanan.order.update', $order->id) }}" class="d-inline">
-                                        @csrf
-                                        <input type="hidden" name="status" value="rejected">
-                                        <button type="submit" class="btn btn-sm btn-danger"><i class="fas fa-times"></i> Tolak</button>
-                                    </form>
-                                @elseif($order->status === 'approved')
-                                    <form method="POST" action="{{ route('admin.makanan.order.update', $order->id) }}" class="d-inline">
-                                        @csrf
-                                        <input type="hidden" name="status" value="preparing">
-                                        <button type="submit" class="btn btn-sm btn-primary me-1"><i class="fas fa-fire"></i> Proses</button>
-                                    </form>
-                                @elseif($order->status === 'preparing')
-                                    <form method="POST" action="{{ route('admin.makanan.order.update', $order->id) }}" class="d-inline">
-                                        @csrf
-                                        <input type="hidden" name="status" value="delivered">
-                                        <button type="submit" class="btn btn-sm btn-success"><i class="fas fa-check-double"></i> Selesai</button>
-                                    </form>
-                                @else
-                                    -
-                                @endif
+                                <div class="d-flex flex-wrap gap-1">
+                                    @if($order->status === 'pending')
+                                        <form method="POST" action="{{ route('admin.makanan.order.update', $order->id) }}" class="d-inline">
+                                            @csrf
+                                            <input type="hidden" name="status" value="approved">
+                                            <button type="submit" class="btn btn-sm btn-success"><i class="fas fa-check"></i> Terima</button>
+                                        </form>
+                                        <form method="POST" action="{{ route('admin.makanan.order.update', $order->id) }}" class="d-inline">
+                                            @csrf
+                                            <input type="hidden" name="status" value="rejected">
+                                            <button type="submit" class="btn btn-sm btn-danger"><i class="fas fa-times"></i> Tolak</button>
+                                        </form>
+                                    @elseif($order->status === 'approved')
+                                        <form method="POST" action="{{ route('admin.makanan.order.update', $order->id) }}" class="d-inline">
+                                            @csrf
+                                            <input type="hidden" name="status" value="preparing">
+                                            <button type="submit" class="btn btn-sm btn-primary"><i class="fas fa-fire"></i> Proses</button>
+                                        </form>
+                                    @elseif($order->status === 'preparing')
+                                        <form method="POST" action="{{ route('admin.makanan.order.update', $order->id) }}" class="d-inline">
+                                            @csrf
+                                            <input type="hidden" name="status" value="delivered">
+                                            <button type="submit" class="btn btn-sm btn-success"><i class="fas fa-check-double"></i> Selesai</button>
+                                        </form>
+                                    @endif
+                                </div>
                             </td>
                         </tr>
                         @empty

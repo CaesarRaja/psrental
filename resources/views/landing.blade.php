@@ -83,7 +83,7 @@
                     <div class="ps-console-wrapper">
                         <div class="console-glow"></div>
                         <div class="console-image">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/03/PlayStation_5_and_DualSense_with_transparent_background.png/1200px-PlayStation_5_and_DualSense_with_transparent_background.png" alt="PS5 Console">
+                            <img src="{{ asset('images/logo/stikps.png') }}" alt="PS5 Console">
                         </div>
                         <div class="floating-card card-1">
                             <i class="fas fa-star"></i>

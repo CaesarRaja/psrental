@@ -8,8 +8,10 @@ use App\Models\FoodOrder;
 use App\Models\Complaint;
 use App\Models\Queue;
 use App\Models\Payment;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 
 class CustomerController extends Controller
@@ -126,6 +128,14 @@ class CustomerController extends Controller
             'status' => 'pending',
         ]);
 
+        NotificationService::notifyAdmins(
+            'Reservasi Baru',
+            'Reservasi baru dari ' . Auth::user()->name . ' untuk ' . $validated['console_type'] . ' pada ' . $validated['date'] . ' ' . $validated['start_time'],
+            route('admin.reservasi'),
+            'reservation',
+            $reservation->id
+        );
+
         return redirect()->route('customer.reservasi')
             ->with('success', 'Reservasi berhasil dibuat! Menunggu konfirmasi admin.');
     }
@@ -203,6 +213,14 @@ class CustomerController extends Controller
                 $food->decrement('stock', $item['qty']);
             }
         }
+
+        NotificationService::notifyAdmins(
+            'Pesanan Makanan Baru',
+            'Pesanan makanan dari ' . Auth::user()->name . ' senilai Rp ' . number_format($validated['total']),
+            route('admin.makanan'),
+            'food_order',
+            $order->id
+        );
 
         return back()->with('success', 'Pesanan berhasil dibuat! Menunggu konfirmasi admin.');
     }
@@ -307,9 +325,19 @@ class CustomerController extends Controller
 
         if ($existingPayment) {
             $existingPayment->update($updateData);
+            $paymentId = $existingPayment->id;
         } else {
-            Payment::create($updateData);
+            $payment = Payment::create($updateData);
+            $paymentId = $payment->id;
         }
+
+        NotificationService::notifyAdmins(
+            'Bukti Pembayaran Baru',
+            'Pembayaran dari ' . Auth::user()->name . ' untuk reservasi #' . $reservation->id . ' senilai Rp ' . number_format($reservation->total_price),
+            route('admin.pembayaran'),
+            'payment',
+            $paymentId
+        );
 
         return back()->with('success', 'Pembayaran berhasil dikirim. Menunggu konfirmasi admin.');
     }
@@ -364,6 +392,147 @@ class CustomerController extends Controller
             $complaint->update(['attachment' => $path]);
         }
 
+        NotificationService::notifyAdmins(
+            'Keluhan Baru',
+            'Keluhan dari ' . Auth::user()->name . ': ' . $validated['subject'],
+            route('admin.keluhan'),
+            'complaint',
+            $complaint->id
+        );
+
         return back()->with('success', 'Keluhan berhasil dikirim. Admin akan segera merespons.');
+    }
+
+    public function destroyReservasi($id)
+    {
+        $reservation = Reservation::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
+
+        if ($reservation->payment && $reservation->payment->proof_image && Storage::disk('public')->exists($reservation->payment->proof_image)) {
+            Storage::disk('public')->delete($reservation->payment->proof_image);
+        }
+        $reservation->payment()->delete();
+        $reservation->queue()->delete();
+        $reservation->billingExtensions()->delete();
+        $reservation->foodOrders()->delete();
+        $reservation->delete();
+
+        return back()->with('success', 'Reservasi berhasil dihapus.');
+    }
+
+    public function destroyPembayaran($id)
+    {
+        $payment = Payment::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
+
+        if ($payment->proof_image && Storage::disk('public')->exists($payment->proof_image)) {
+            Storage::disk('public')->delete($payment->proof_image);
+        }
+        $payment->delete();
+
+        return back()->with('success', 'Pembayaran berhasil dihapus.');
+    }
+
+    public function destroyKeluhan($id)
+    {
+        $complaint = Complaint::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
+
+        if ($complaint->attachment && Storage::disk('public')->exists($complaint->attachment)) {
+            Storage::disk('public')->delete($complaint->attachment);
+        }
+        $complaint->delete();
+
+        return back()->with('success', 'Keluhan berhasil dihapus.');
+    }
+
+    public function destroyAllReservasi()
+    {
+        $userId = Auth::id();
+        $reservations = Reservation::where('user_id', $userId)->get();
+
+        foreach ($reservations as $reservation) {
+            if ($reservation->payment && $reservation->payment->proof_image && Storage::disk('public')->exists($reservation->payment->proof_image)) {
+                Storage::disk('public')->delete($reservation->payment->proof_image);
+            }
+        }
+
+        Payment::whereIn('reservation_id', $reservations->pluck('id'))->delete();
+        Queue::whereIn('reservation_id', $reservations->pluck('id'))->delete();
+        \App\Models\BillingExtension::whereIn('reservation_id', $reservations->pluck('id'))->delete();
+        FoodOrder::whereIn('reservation_id', $reservations->pluck('id'))->delete();
+        Reservation::where('user_id', $userId)->delete();
+
+        return back()->with('success', 'Semua reservasi berhasil dihapus.');
+    }
+
+    public function destroyAllPembayaran()
+    {
+        $userId = Auth::id();
+        $payments = Payment::where('user_id', $userId)->whereNotNull('proof_image')->get();
+        foreach ($payments as $payment) {
+            if (Storage::disk('public')->exists($payment->proof_image)) {
+                Storage::disk('public')->delete($payment->proof_image);
+            }
+        }
+
+        Payment::where('user_id', $userId)->delete();
+
+        return back()->with('success', 'Semua pembayaran berhasil dihapus.');
+    }
+
+    public function destroyAllKeluhan()
+    {
+        $userId = Auth::id();
+        $complaints = Complaint::where('user_id', $userId)->whereNotNull('attachment')->get();
+        foreach ($complaints as $complaint) {
+            if (Storage::disk('public')->exists($complaint->attachment)) {
+                Storage::disk('public')->delete($complaint->attachment);
+            }
+        }
+
+        Complaint::where('user_id', $userId)->delete();
+
+        return back()->with('success', 'Semua keluhan berhasil dihapus.');
+    }
+
+    public function profile()
+    {
+        $user = Auth::user();
+        return view('customer.profile', compact('user'));
+    }
+
+    public function updateProfile(Request $request)
+    {
+        $user = Auth::user();
+
+        $rules = [
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'phone' => 'nullable|string|max:20',
+            'address' => 'nullable|string|max:500',
+        ];
+
+        if ($request->filled('password')) {
+            $rules['current_password'] = 'required|string';
+            $rules['password'] = 'required|string|min:8|confirmed';
+        }
+
+        $validated = $request->validate($rules);
+
+        $updateData = [
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'phone' => $validated['phone'] ?? null,
+            'address' => $validated['address'] ?? null,
+        ];
+
+        if ($request->filled('password')) {
+            if (!Hash::check($validated['current_password'], $user->password)) {
+                return back()->withErrors(['current_password' => 'Password lama tidak cocok.']);
+            }
+            $updateData['password'] = Hash::make($validated['password']);
+        }
+
+        $user->update($updateData);
+
+        return back()->with('success', 'Profil berhasil diperbarui.');
     }
 }

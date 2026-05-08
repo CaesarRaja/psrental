@@ -13,6 +13,9 @@
             <li><a href="{{ route('admin.dashboard') }}" class="{{ $active === 'dashboard' ? 'active' : '' }}">
                 <i class="fas fa-tachometer-alt"></i> Dashboard
             </a></li>
+            <li><a href="{{ route('admin.customers') }}" class="{{ $active === 'customers' ? 'active' : '' }}">
+                <i class="fas fa-users"></i> Manajemen Customer
+            </a></li>
             <li><a href="{{ route('admin.reservasi') }}" class="{{ $active === 'reservasi' ? 'active' : '' }}">
                 <i class="fas fa-calendar-alt"></i> Manajemen Reservasi
             </a></li>
@@ -48,6 +51,9 @@
                 <i class="fas fa-credit-card"></i> Pembayaran
             </a></li>
             <li class="nav-label">Lainnya</li>
+            <li><a href="{{ route('customer.profile') }}" class="{{ $active === 'profile' ? 'active' : '' }}">
+                <i class="fas fa-user-circle"></i> Profil Saya
+            </a></li>
             <li><a href="{{ route('customer.keluhan') }}" class="{{ $active === 'keluhan' ? 'active' : '' }}">
                 <i class="fas fa-comment-dots"></i> Keluhan
             </a></li>

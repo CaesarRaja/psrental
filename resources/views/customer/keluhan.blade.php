@@ -67,8 +67,14 @@
     </div>
 
     <div class="dashboard-card">
-        <div class="card-header-custom">
-            <h5><i class="fas fa-history me-2"></i>Riwayat Keluhan</h5>
+        <div class="card-header-custom d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="fas fa-history me-2"></i>Riwayat Keluhan</h5>
+            <form action="{{ route('customer.keluhan.destroyAll') }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin ingin menghapus SEMUA keluhan kamu? Tindakan ini tidak dapat dibatalkan.');">
+                @csrf
+                <button type="submit" class="btn btn-sm btn-outline-danger">
+                    <i class="fas fa-trash-alt me-1"></i> Hapus Semua
+                </button>
+            </form>
         </div>
         <div class="card-body-custom p-0">
             <div class="table-responsive">
@@ -83,6 +89,7 @@
                             <th>Respons</th>
                             <th>Foto</th>
                             <th>Tanggal</th>
+                            <th>Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -112,10 +119,13 @@
                                 @endif
                             </td>
                             <td>{{ \Carbon\Carbon::parse($complaint->created_at)->format('d M Y') }}</td>
+                            <td>
+                                <span class="text-muted">-</span>
+                            </td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="8" class="text-center text-muted py-4">
+                            <td colspan="9" class="text-center text-muted py-4">
                                 Belum ada keluhan
                             </td>
                         </tr>

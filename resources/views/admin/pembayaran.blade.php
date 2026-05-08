@@ -47,8 +47,14 @@
     </div>
 
     <div class="dashboard-card">
-        <div class="card-header-custom">
-            <h5><i class="fas fa-credit-card me-2"></i>Daftar Pembayaran</h5>
+        <div class="card-header-custom d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="fas fa-credit-card me-2"></i>Daftar Pembayaran</h5>
+            <form action="{{ route('admin.pembayaran.destroyAll') }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin ingin menghapus SEMUA pembayaran? Tindakan ini tidak dapat dibatalkan.');">
+                @csrf
+                <button type="submit" class="btn btn-sm btn-outline-danger">
+                    <i class="fas fa-trash-alt me-1"></i> Hapus Semua
+                </button>
+            </form>
         </div>
         <div class="card-body-custom p-0">
             <div class="table-responsive">
@@ -89,15 +95,17 @@
                             </td>
                             <td>{{ \Carbon\Carbon::parse($payment->created_at)->format('d M Y H:i') }}</td>
                             <td>
-                                @if($payment->reservation)
-                                    <button class="btn btn-sm btn-outline-primary mb-1" onclick="showInvoice({{ $payment->id }})">
-                                        <i class="fas fa-file-invoice"></i> Invoice
-                                    </button>
-                                @endif
-                                @if($payment->status === 'pending')
-                                    <button class="btn btn-sm btn-success mb-1" onclick="approvePayment({{ $payment->id }})">Approve</button>
-                                    <button class="btn btn-sm btn-danger" onclick="rejectPayment({{ $payment->id }})">Tolak</button>
-                                @endif
+                                <div class="d-flex flex-wrap gap-1">
+                                    @if($payment->reservation)
+                                        <button class="btn btn-sm btn-outline-primary" onclick="showInvoice({{ $payment->id }})">
+                                            <i class="fas fa-file-invoice"></i> Invoice
+                                        </button>
+                                    @endif
+                                    @if($payment->status === 'pending')
+                                        <button class="btn btn-sm btn-success" onclick="approvePayment({{ $payment->id }})">Approve</button>
+                                        <button class="btn btn-sm btn-danger" onclick="rejectPayment({{ $payment->id }})">Tolak</button>
+                                    @endif
+                                </div>
                             </td>
                         </tr>
                         @empty

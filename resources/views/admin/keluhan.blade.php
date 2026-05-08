@@ -56,8 +56,14 @@
     </div>
 
     <div class="dashboard-card">
-        <div class="card-header-custom">
-            <h5><i class="fas fa-comment-dots me-2"></i>Daftar Keluhan</h5>
+        <div class="card-header-custom d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="fas fa-comment-dots me-2"></i>Daftar Keluhan</h5>
+            <form action="{{ route('admin.keluhan.destroyAll') }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin ingin menghapus SEMUA keluhan? Tindakan ini tidak dapat dibatalkan.');">
+                @csrf
+                <button type="submit" class="btn btn-sm btn-outline-danger">
+                    <i class="fas fa-trash-alt me-1"></i> Hapus Semua
+                </button>
+            </form>
         </div>
         <div class="card-body-custom p-0">
             <div class="table-responsive">
@@ -101,9 +107,11 @@
                                 @endif
                             </td>
                             <td>
-                                <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#responseModal{{ $complaint->id }}">
-                                    <i class="fas fa-reply me-1"></i> Respon
-                                </button>
+                                <div class="d-flex flex-wrap gap-1">
+                                    <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#responseModal{{ $complaint->id }}">
+                                        <i class="fas fa-reply me-1"></i> Respon
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                         @empty
