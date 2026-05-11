@@ -9,7 +9,7 @@ class Console extends Model
     protected $table = 'consoles';
     
     protected $fillable = [
-        'name', 'type', 'status',
+        'name', 'type', 'status', 'price_per_hour',
     ];
 
     public function reservations()

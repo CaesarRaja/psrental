@@ -16,6 +16,9 @@
             <li><a href="{{ route('admin.customers') }}" class="{{ $active === 'customers' ? 'active' : '' }}">
                 <i class="fas fa-users"></i> Manajemen Customer
             </a></li>
+            <li><a href="{{ route('admin.consoles') }}" class="{{ $active === 'consoles' ? 'active' : '' }}">
+                <i class="fas fa-desktop"></i> Kelola Console
+            </a></li>
             <li><a href="{{ route('admin.reservasi') }}" class="{{ $active === 'reservasi' ? 'active' : '' }}">
                 <i class="fas fa-calendar-alt"></i> Manajemen Reservasi
             </a></li>

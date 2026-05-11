@@ -64,9 +64,20 @@
     <div class="dashboard-card">
         <div class="card-header-custom">
             <h5><i class="fas fa-desktop me-2"></i>Status Console</h5>
-            <span class="badge bg-success">{{ $availableConsoles ?? 0 }} Tersedia</span>
+            <div>
+                <span class="badge bg-success me-1">{{ $availableConsoles ?? 0 }} Tersedia</span>
+                <span class="badge bg-warning me-1">{{ $busyConsoles ?? 0 }} Sibuk</span>
+                <span class="badge bg-danger">{{ $maintenanceConsoles ?? 0 }} Maintenance</span>
+            </div>
         </div>
         <div class="card-body-custom">
+            @if(isset($consoleByType) && count($consoleByType) > 0)
+            <div class="mb-3">
+                @foreach($consoleByType as $type => $counts)
+                <span class="badge bg-secondary me-2 mb-1">{{ $type }}: {{ $counts['total'] }} unit ({{ $counts['available'] }} tersedia, {{ $counts['busy'] }} sibuk, {{ $counts['maintenance'] }} maintenance)</span>
+                @endforeach
+            </div>
+            @endif
             <div class="console-status-grid">
                 @foreach($consoles ?? [] as $console)
                 <div class="console-status-item {{ $console->status }}">

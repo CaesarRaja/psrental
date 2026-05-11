@@ -66,6 +66,13 @@ Route::middleware(['auth'])->prefix('customer')->name('customer.')->group(functi
 Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [App\Http\Controllers\AdminController::class, 'dashboard'])->name('dashboard');
 
+    // Console Management
+    Route::get('/consoles', [App\Http\Controllers\AdminController::class, 'consoles'])->name('consoles');
+    Route::post('/consoles/type-price', [App\Http\Controllers\AdminController::class, 'updateConsoleTypePrice'])->name('consoles.updateTypePrice');
+    Route::post('/consoles', [App\Http\Controllers\AdminController::class, 'storeConsole'])->name('consoles.store');
+    Route::post('/consoles/{id}', [App\Http\Controllers\AdminController::class, 'updateConsole'])->name('consoles.update');
+    Route::delete('/consoles/{id}', [App\Http\Controllers\AdminController::class, 'destroyConsole'])->name('consoles.destroy');
+
     // Reservasi Management
     Route::get('/reservasi', [App\Http\Controllers\AdminController::class, 'reservasi'])->name('reservasi');
     Route::post('/reservasi/{id}/approve', [App\Http\Controllers\AdminController::class, 'approveReservasi'])->name('reservasi.approve');

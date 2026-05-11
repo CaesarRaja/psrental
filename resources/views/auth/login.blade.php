@@ -83,26 +83,12 @@
                             <input type="checkbox" class="form-check-input" name="remember" id="remember">
                             <label class="form-check-label" for="remember">Ingat saya</label>
                         </div>
-                        <a href="#" class="forgot-link">Lupa password?</a>
                     </div>
 
                     <button type="submit" class="btn btn-auth btn-primary btn-block">
                         <i class="fas fa-sign-in-alt me-2"></i> Masuk
                     </button>
                 </form>
-
-                <div class="auth-divider">
-                    <span>atau masuk dengan</span>
-                </div>
-
-                <div class="social-login">
-                    <a href="#" class="btn-social btn-google">
-                        <i class="fab fa-google"></i> Google
-                    </a>
-                    <a href="#" class="btn-social btn-facebook">
-                        <i class="fab fa-facebook-f"></i> Facebook
-                    </a>
-                </div>
 
                 <div class="auth-footer">
                     <p>Belum punya akun? <a href="{{ route('register') }}">Daftar sekarang</a></p>

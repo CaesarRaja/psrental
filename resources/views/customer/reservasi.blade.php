@@ -33,11 +33,8 @@
                         <label class="form-label">Console Dipilih</label>
                         <select name="console_type" id="console_type" class="form-select" required onchange="calculateTotal()">
                             <option value="">Pilih console</option>
-                            @foreach($consoles as $console)
-                                @php
-                                    $price = $console->type === 'PS4' ? 15000 : ($console->type === 'PS5' ? 25000 : 35000);
-                                @endphp
-                                <option value="{{ $console->type }}" data-price="{{ $price }}">{{ $console->name }} ({{ $console->type }}) – Rp {{ number_format($price) }}/jam</option>
+                            @foreach($consoleTypes as $ct)
+                                <option value="{{ $ct->type }}" data-price="{{ $ct->price_per_hour }}">{{ $ct->type }} – Rp {{ number_format($ct->price_per_hour) }}/jam</option>
                             @endforeach
                         </select>
                     </div>

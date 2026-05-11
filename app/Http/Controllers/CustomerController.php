@@ -103,9 +103,12 @@ class CustomerController extends Controller
         $reservations = Reservation::where('user_id', Auth::id())
             ->latest()->paginate(10);
 
-        $consoles = \App\Models\Console::where('status', 'available')->get();
+        $consoleTypes = \App\Models\Console::where('status', 'available')
+            ->select('type', 'price_per_hour')
+            ->distinct()
+            ->get();
 
-        return view('customer.reservasi', compact('reservations', 'consoles'));
+        return view('customer.reservasi', compact('reservations', 'consoleTypes'));
     }
 
     public function storeReservasi(Request $request)
