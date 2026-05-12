@@ -12,6 +12,7 @@
             <h2>Keluhan Customer</h2>
             <p class="text-muted mb-0">Lihat dan respon keluhan pelanggan</p>
         </div>
+        @include('partials.header-actions-auth')
     </div>
 @endsection
 

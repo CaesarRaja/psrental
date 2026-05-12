@@ -36,7 +36,7 @@ Route::middleware(['auth'])->group(function () {
 });
 
 // Customer Routes (Protected)
-Route::middleware(['auth'])->prefix('customer')->name('customer.')->group(function () {
+Route::middleware(['auth', 'customer'])->prefix('customer')->name('customer.')->group(function () {
     Route::get('/dashboard', [App\Http\Controllers\CustomerController::class, 'dashboard'])->name('dashboard');
     Route::get('/reservasi', [App\Http\Controllers\CustomerController::class, 'reservasi'])->name('reservasi');
     Route::post('/reservasi', [App\Http\Controllers\CustomerController::class, 'storeReservasi'])->name('reservasi.store');
@@ -63,7 +63,7 @@ Route::middleware(['auth'])->prefix('customer')->name('customer.')->group(functi
 });
 
 // Admin Routes (Protected)
-Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [App\Http\Controllers\AdminController::class, 'dashboard'])->name('dashboard');
 
     // Console Management

@@ -17,6 +17,32 @@
 
         <main class="main-content">
             @yield('header')
+            @if (session('error'))
+                <div class="alert alert-danger alert-dismissible fade show mx-3 mt-3 mb-0" role="alert">
+                    {{ session('error') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Tutup"></button>
+                </div>
+            @endif
+            @if (session('console_full'))
+            <div class="app-notify app-notify--warning" role="alert">
+                <div class="app-notify__icon-wrap" aria-hidden="true">
+                    <i class="fas fa-gamepad"></i>
+                </div>
+                <div class="app-notify__body">
+                    <p class="app-notify__msg">{{ session('console_full') }}</p>
+                    @auth
+                        @if (auth()->user()->isCustomer())
+                            <a href="{{ route('customer.dashboard') }}" class="app-notify__cta">
+                                <i class="fas fa-clipboard-list me-1"></i> Lihat status antrian di dashboard
+                            </a>
+                        @endif
+                    @endauth
+                </div>
+                <button type="button" class="app-notify__close" data-app-notify-close aria-label="Tutup">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            @endif
             @yield('content')
         </main>
     </div>

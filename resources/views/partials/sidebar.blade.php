@@ -74,7 +74,7 @@
             </div>
             <div class="user-details">
                 <h6>{{ Auth::user()->name ?? 'Pengguna' }}</h6>
-                <small>{{ $type === 'admin' ? 'Administrator' : 'Customer' }}</small>
+                <small>{{ ucfirst(Auth::user()->role ?? 'pengguna') }}</small>
             </div>
         </div>
     </div>

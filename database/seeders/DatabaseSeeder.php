@@ -2,66 +2,26 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\User;
-use App\Models\Console;
-use App\Models\Food;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
+    /**
+     * Hanya akun admin untuk login panel admin.
+     * Email: admin@gmail.com | Password: admin12345
+     */
     public function run(): void
     {
-        // Create Admin
-        User::create([
-            'name' => 'Admin',
-            'email' => 'admin@psrent.com',
-            'phone' => '081234567890',
-            'password' => Hash::make('admin123'),
-            'role' => 'admin',
-        ]);
-
-        // Create Demo Customer
-        User::create([
-            'name' => 'Ahmad Rizky',
-            'email' => 'demo@psrent.com',
-            'phone' => '081234567891',
-            'password' => Hash::make('demo123'),
-            'role' => 'customer',
-        ]);
-
-        // Create Consoles
-        $consoles = [
-            ['name' => 'PS4-1', 'type' => 'PS4'],
-            ['name' => 'PS4-2', 'type' => 'PS4'],
-            ['name' => 'PS4-3', 'type' => 'PS4'],
-            ['name' => 'PS5-1', 'type' => 'PS5'],
-            ['name' => 'PS5-2', 'type' => 'PS5'],
-            ['name' => 'PS5-3', 'type' => 'PS5'],
-            ['name' => 'VR-1', 'type' => 'VR'],
-            ['name' => 'VR-2', 'type' => 'VR'],
-        ];
-
-        foreach ($consoles as $console) {
-            Console::create(array_merge($console, ['status' => 'available']));
-        }
-
-        // Create Food Items
-        $foods = [
-            ['name' => 'Burger', 'category' => 'Makanan', 'price' => 25000, 'stock' => 50],
-            ['name' => 'Pizza Slice', 'category' => 'Makanan', 'price' => 20000, 'stock' => 30],
-            ['name' => 'Chicken Wings', 'category' => 'Makanan', 'price' => 30000, 'stock' => 40],
-            ['name' => 'French Fries', 'category' => 'Snack', 'price' => 15000, 'stock' => 60],
-            ['name' => 'Cola', 'category' => 'Minuman', 'price' => 8000, 'stock' => 100],
-            ['name' => 'Jus Jeruk', 'category' => 'Minuman', 'price' => 12000, 'stock' => 80],
-            ['name' => 'Kopi', 'category' => 'Minuman', 'price' => 10000, 'stock' => 50],
-            ['name' => 'Popcorn', 'category' => 'Snack', 'price' => 10000, 'stock' => 70],
-            ['name' => 'Ice Cream', 'category' => 'Snack', 'price' => 8000, 'stock' => 40],
-            ['name' => 'Mie Goreng', 'category' => 'Makanan', 'price' => 18000, 'stock' => 35],
-        ];
-
-        foreach ($foods as $food) {
-            Food::create($food);
-        }
+        User::updateOrCreate(
+            ['email' => 'admin@gmail.com'],
+            [
+                'name' => 'Admin',
+                'phone' => '081234567890',
+                'password' => Hash::make('admin12345'),
+                'role' => 'admin',
+            ]
+        );
     }
 }

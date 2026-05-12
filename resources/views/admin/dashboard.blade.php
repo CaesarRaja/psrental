@@ -12,12 +12,7 @@
             <h2>Admin Dashboard 🛡️</h2>
             <p class="text-muted mb-0">Kelola sistem rental PlayStation kamu</p>
         </div>
-        <div class="header-actions">
-            @include('partials.notifications')
-            <a href="{{ route('logout') }}" class="btn btn-sm btn-outline-danger">
-                <i class="fas fa-sign-out-alt"></i> Logout
-            </a>
-        </div>
+        @include('partials.header-actions-auth')
     </div>
 @endsection
 
@@ -65,66 +60,89 @@
         <div class="card-header-custom">
             <h5><i class="fas fa-desktop me-2"></i>Status Console</h5>
             <div>
-                <span class="badge bg-success me-1">{{ $availableConsoles ?? 0 }} Tersedia</span>
-                <span class="badge bg-warning me-1">{{ $busyConsoles ?? 0 }} Sibuk</span>
-                <span class="badge bg-danger">{{ $maintenanceConsoles ?? 0 }} Maintenance</span>
+                <span class="badge text-bg-secondary me-1">{{ $availableConsoles ?? 0 }} Tersedia</span>
+                <span class="badge text-bg-secondary me-1">{{ $busyConsoles ?? 0 }} Sibuk</span>
+                <span class="badge text-bg-secondary">{{ $maintenanceConsoles ?? 0 }} Maintenance</span>
             </div>
         </div>
         <div class="card-body-custom">
-            @if(isset($consoleByType) && count($consoleByType) > 0)
-            <div class="mb-3">
-                @foreach($consoleByType as $type => $counts)
-                <span class="badge bg-secondary me-2 mb-1">{{ $type }}: {{ $counts['total'] }} unit ({{ $counts['available'] }} tersedia, {{ $counts['busy'] }} sibuk, {{ $counts['maintenance'] }} maintenance)</span>
-                @endforeach
-            </div>
-            @endif
-            <div class="console-status-grid">
-                @foreach($consoles ?? [] as $console)
-                <div class="console-status-item {{ $console->status }}">
-                    <span class="console-dot"></span>
-                    <h6>{{ $console->name }}</h6>
-                    <small>
-                        @switch($console->status)
-                            @case('available')
-                                Available
-                                @break
-                            @case('busy')
-                                Unavailable
-                                @break
-                            @case('maintenance')
-                                Maintenance
-                                @break
-                            @default
-                                {{ ucfirst($console->status) }}
-                        @endswitch
-                    </small>
-                    @if($console->status === 'busy')
-                        @php
-                            $consoleReservation = $activeReservations->firstWhere('console_type', $console->type);
-                        @endphp
-                        @if($consoleReservation)
-                            @php
-                                if ($consoleReservation->started_at) {
-                                    $startTime = strtotime($consoleReservation->started_at);
-                                } else {
-                                    $startTime = strtotime($consoleReservation->date . ' ' . $consoleReservation->start_time);
-                                }
-                                $totalDurationHours = $consoleReservation->duration + ($consoleReservation->extended_duration / 60);
-                                $totalDuration = $totalDurationHours * 3600;
-                                $endTime = $startTime + $totalDuration;
-                                $remaining = max(0, $endTime - time());
-                                $rH = floor($remaining / 3600);
-                                $rM = floor(($remaining % 3600) / 60);
-                                $rS = $remaining % 60;
-                            @endphp
-                            <small class="timer-admin text-success" data-remaining="{{ $remaining }}">
-                                {{ sprintf('%02d:%02d:%02d', $rH, $rM, $rS) }}
-                            </small>
+            @php
+                $groupedConsoles = ($consoles ?? collect())->sortBy('name')->groupBy('type');
+                $preferredTypeOrder = ['PS4', 'PS5', 'VR'];
+                $sectionTypes = collect($preferredTypeOrder)
+                    ->filter(fn ($t) => $groupedConsoles->has($t))
+                    ->merge($groupedConsoles->keys()->diff($preferredTypeOrder)->sort()->values());
+            @endphp
+            @forelse($sectionTypes as $type)
+                @php
+                    $counts = $consoleByType[$type] ?? null;
+                    $units = $groupedConsoles->get($type, collect());
+                @endphp
+                <div class="console-type-section">
+                    <div class="console-type-section__bar">
+                        <div class="console-type-section__title">
+                            <i class="fas fa-gamepad" aria-hidden="true"></i>
+                            <strong>{{ $type }}</strong>
+                        </div>
+                        @if($counts)
+                        <div class="console-type-section__badges">
+                            <span class="badge text-bg-secondary me-1">{{ $counts['available'] }} Tersedia</span>
+                            <span class="badge text-bg-secondary me-1">{{ $counts['busy'] }} Sibuk</span>
+                            <span class="badge text-bg-secondary">{{ $counts['maintenance'] }} Maintenance</span>
+                        </div>
                         @endif
-                    @endif
+                    </div>
+                    <div class="console-status-grid">
+                        @foreach($units as $console)
+                        <div class="console-status-item {{ $console->status }}">
+                            <span class="console-dot"></span>
+                            <h6>{{ $console->name }}</h6>
+                            <small>
+                                @switch($console->status)
+                                    @case('available')
+                                        Available
+                                        @break
+                                    @case('busy')
+                                        Unavailable
+                                        @break
+                                    @case('maintenance')
+                                        Maintenance
+                                        @break
+                                    @default
+                                        {{ ucfirst($console->status) }}
+                                @endswitch
+                            </small>
+                            @if($console->status === 'busy')
+                                @php
+                                    $consoleReservation = $activeReservations->firstWhere('console_type', $console->type);
+                                @endphp
+                                @if($consoleReservation)
+                                    @php
+                                        if ($consoleReservation->started_at) {
+                                            $startTime = strtotime($consoleReservation->started_at);
+                                        } else {
+                                            $startTime = strtotime($consoleReservation->date . ' ' . $consoleReservation->start_time);
+                                        }
+                                        $totalDurationHours = $consoleReservation->duration + ($consoleReservation->extended_duration / 60);
+                                        $totalDuration = $totalDurationHours * 3600;
+                                        $endTime = $startTime + $totalDuration;
+                                        $remaining = max(0, $endTime - time());
+                                        $rH = floor($remaining / 3600);
+                                        $rM = floor(($remaining % 3600) / 60);
+                                        $rS = $remaining % 60;
+                                    @endphp
+                                    <small class="timer-admin text-success" data-remaining="{{ $remaining }}">
+                                        {{ sprintf('%02d:%02d:%02d', $rH, $rM, $rS) }}
+                                    </small>
+                                @endif
+                            @endif
+                        </div>
+                        @endforeach
+                    </div>
                 </div>
-                @endforeach
-            </div>
+            @empty
+                <p class="text-muted mb-0">Belum ada data console.</p>
+            @endforelse
         </div>
     </div>
 

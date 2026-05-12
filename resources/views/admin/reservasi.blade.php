@@ -12,6 +12,7 @@
             <h2>Manajemen Reservasi</h2>
             <p class="text-muted mb-0">Kelola semua reservasi customer</p>
         </div>
+        @include('partials.header-actions-auth')
     </div>
 @endsection
 
@@ -104,10 +105,17 @@
                                             <button type="submit" class="btn btn-sm btn-danger">Tolak</button>
                                         </form>
                                     @elseif($reservation->status === 'approved')
+                                        @php
+                                            $slots = (int) ($availableByType[$reservation->console_type] ?? 0);
+                                        @endphp
+                                        @if($slots > 0)
                                         <form action="{{ route('admin.reservasi.start', $reservation->id) }}" method="POST">
                                             @csrf
                                             <button type="submit" class="btn btn-sm btn-primary">Mulai</button>
                                         </form>
+                                        @else
+                                        <button type="button" class="btn btn-sm btn-secondary" onclick="showAppNotify('Mohon maaf, console penuh. Semua unit {{ $reservation->console_type }} sedang digunakan.')">Mulai</button>
+                                        @endif
                                     @elseif($reservation->status === 'active')
                                         <form action="{{ route('admin.reservasi.complete', $reservation->id) }}" method="POST">
                                             @csrf

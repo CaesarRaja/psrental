@@ -12,8 +12,11 @@ class NotificationService
      */
     public static function notifyUser(int $userId, string $title, string $message, ?string $link = null, ?string $notifiableType = null, ?int $notifiableId = null): Notification
     {
+        $roleTarget = User::whereKey($userId)->value('role');
+
         return Notification::create([
             'user_id' => $userId,
+            'role_target' => $roleTarget,
             'title' => $title,
             'message' => $message,
             'link' => $link,

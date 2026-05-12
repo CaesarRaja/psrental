@@ -75,6 +75,12 @@ document.addEventListener('DOMContentLoaded', function () {
             }, 500);
         });
     }
+
+    document.querySelectorAll('[data-app-notify-close]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            this.closest('.app-notify')?.remove();
+        });
+    });
 });
 
 /**
@@ -117,6 +123,51 @@ function handleReservation(form) {
             submitBtn.classList.add('btn-primary');
         }, 2000);
     }, 1500);
+}
+
+/**
+ * Escape text for safe insertion into HTML
+ */
+function escapeHtml(text) {
+    if (text == null) {
+        return '';
+    }
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+/**
+ * In-app notice (matches dashboard theme; use instead of window.alert)
+ */
+function showAppNotify(message, variant = 'warning') {
+    const main = document.querySelector('.main-content');
+    if (!main) {
+        return;
+    }
+    const el = document.createElement('div');
+    el.className = 'app-notify app-notify--' + variant;
+    el.setAttribute('role', 'alert');
+    el.innerHTML =
+        '<div class="app-notify__icon-wrap" aria-hidden="true">' +
+        '<i class="fas fa-circle-exclamation"></i></div>' +
+        '<div class="app-notify__body">' +
+        '<p class="app-notify__msg">' +
+        escapeHtml(message) +
+        '</p></div>' +
+        '<button type="button" class="app-notify__close" data-app-notify-close aria-label="Tutup">' +
+        '<i class="fas fa-times"></i></button>';
+
+    const header = main.querySelector('.main-header');
+    if (header) {
+        header.after(el);
+    } else {
+        main.prepend(el);
+    }
+
+    el.querySelector('[data-app-notify-close]')?.addEventListener('click', function () {
+        el.remove();
+    });
 }
 
 /**

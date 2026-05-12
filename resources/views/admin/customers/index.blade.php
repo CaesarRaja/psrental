@@ -12,6 +12,7 @@
             <h2>Manajemen Customer</h2>
             <p class="text-muted mb-0">Kelola semua akun customer</p>
         </div>
+        @include('partials.header-actions-auth')
     </div>
 @endsection
 

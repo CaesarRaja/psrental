@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Reservation;
+use App\Models\Console;
 use App\Models\Food;
 use App\Models\FoodOrder;
 use App\Models\Complaint;
@@ -103,9 +104,10 @@ class CustomerController extends Controller
         $reservations = Reservation::where('user_id', Auth::id())
             ->latest()->paginate(10);
 
-        $consoleTypes = \App\Models\Console::where('status', 'available')
-            ->select('type', 'price_per_hour')
-            ->distinct()
+        $consoleTypes = Console::query()
+            ->selectRaw('type, MAX(price_per_hour) as price_per_hour')
+            ->groupBy('type')
+            ->orderBy('type')
             ->get();
 
         return view('customer.reservasi', compact('reservations', 'consoleTypes'));
@@ -120,6 +122,17 @@ class CustomerController extends Controller
             'duration' => 'required|integer|min:1|max:8',
             'total_price' => 'required|numeric',
         ]);
+
+        $hasAvailableSlot = Console::where('type', $validated['console_type'])
+            ->where('status', 'available')
+            ->exists();
+
+        if (!$hasAvailableSlot) {
+            return redirect()->route('customer.reservasi')->with(
+                'console_full',
+                'Mohon maaf, console ' . $validated['console_type'] . ' sedang penuh sehingga kamu belum dapat bermain saat ini. Pantau nomor antrian lewat tautan di bawah, atau buka menu Dashboard.'
+            );
+        }
 
         $reservation = Reservation::create([
             'user_id' => Auth::id(),

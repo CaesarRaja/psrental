@@ -13,8 +13,12 @@
             <p class="text-muted mb-0">Update informasi akun {{ $customer->name }}</p>
         </div>
         <div class="header-actions">
+            @include('partials.notifications')
             <a href="{{ route('admin.customers') }}" class="btn btn-sm btn-outline-secondary">
                 <i class="fas fa-arrow-left"></i> Kembali
+            </a>
+            <a href="{{ route('logout') }}" class="btn btn-sm btn-outline-danger">
+                <i class="fas fa-sign-out-alt"></i> Logout
             </a>
         </div>
     </div>

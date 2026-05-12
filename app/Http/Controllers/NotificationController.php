@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Notification;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class NotificationController extends Controller
@@ -12,18 +11,25 @@ class NotificationController extends Controller
     {
         $user = Auth::user();
 
-        $notifications = Notification::where(function ($query) use ($user) {
-                $query->where('user_id', $user->id)
-                      ->orWhere(function ($q) use ($user) {
-                          $q->whereNull('user_id')
-                            ->where('role_target', $user->role);
-                      });
-            })
+        $unreadCount = Notification::query()
+            ->forRecipient($user)
+            ->where('is_read', false)
+            ->count();
+
+        $notifications = Notification::query()
+            ->forRecipient($user)
             ->latest()
             ->take(20)
-            ->get();
-
-        $unreadCount = $notifications->where('is_read', false)->count();
+            ->get()
+            ->map(fn ($n) => [
+                'id' => $n->id,
+                'title' => $n->title,
+                'message' => $n->message,
+                'link' => $n->link,
+                'is_read' => (bool) $n->is_read,
+                'created_at_human' => $n->created_at?->diffForHumans() ?? '',
+            ])
+            ->values();
 
         return response()->json([
             'notifications' => $notifications,
@@ -35,14 +41,9 @@ class NotificationController extends Controller
     {
         $user = Auth::user();
 
-        $notification = Notification::where('id', $id)
-            ->where(function ($query) use ($user) {
-                $query->where('user_id', $user->id)
-                      ->orWhere(function ($q) use ($user) {
-                          $q->whereNull('user_id')
-                            ->where('role_target', $user->role);
-                      });
-            })
+        $notification = Notification::query()
+            ->forRecipient($user)
+            ->where('id', $id)
             ->firstOrFail();
 
         $notification->markAsRead();
@@ -54,13 +55,8 @@ class NotificationController extends Controller
     {
         $user = Auth::user();
 
-        Notification::where(function ($query) use ($user) {
-                $query->where('user_id', $user->id)
-                      ->orWhere(function ($q) use ($user) {
-                          $q->whereNull('user_id')
-                            ->where('role_target', $user->role);
-                      });
-            })
+        Notification::query()
+            ->forRecipient($user)
             ->where('is_read', false)
             ->update([
                 'is_read' => true,

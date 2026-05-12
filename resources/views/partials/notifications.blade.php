@@ -1,14 +1,9 @@
 @php
 $user = Auth::user();
-$notifications = \App\Models\Notification::where(function ($query) use ($user) {
-        $query->where('user_id', $user->id)
-              ->orWhere(function ($q) use ($user) {
-                  $q->whereNull('user_id')
-                    ->where('role_target', $user->role);
-              });
-    })
+$notifications = \App\Models\Notification::query()
+    ->forRecipient($user)
     ->latest()
-    ->take(10)
+    ->take(20)
     ->get();
 $unreadCount = $notifications->where('is_read', false)->count();
 @endphp

@@ -12,6 +12,7 @@
             <h2>Kelola Pembayaran</h2>
             <p class="text-muted mb-0">Tinjau dan konfirmasi pembayaran customer</p>
         </div>
+        @include('partials.header-actions-auth')
     </div>
 @endsection
 

@@ -14,6 +14,7 @@ use App\Models\BillingExtension;
 use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 
@@ -92,7 +93,13 @@ class AdminController extends Controller
         }
 
         $reservations = $query->latest()->paginate(15);
-        return view('admin.reservasi', compact('reservations'));
+
+        $availableByType = Console::where('status', 'available')
+            ->selectRaw('type, COUNT(*) as cnt')
+            ->groupBy('type')
+            ->pluck('cnt', 'type');
+
+        return view('admin.reservasi', compact('reservations', 'availableByType'));
     }
 
     public function approveReservasi($id)
@@ -140,31 +147,46 @@ class AdminController extends Controller
     public function startReservasi($id)
     {
         $reservation = Reservation::findOrFail($id);
-        $reservation->update([
-            'status' => 'active',
-            'started_at' => now(),
-        ]);
 
-        // Update console status for the reservation type
-        Console::where('type', $reservation->console_type)
-            ->where('status', 'available')
-            ->first()?->update(['status' => 'busy']);
+        if ($reservation->status !== 'approved') {
+            return back()->with('error', 'Hanya reservasi berstatus disetujui yang dapat dimulai.');
+        }
 
-        // Mark related queue as serving
-        Queue::where('reservation_id', $reservation->id)
-            ->where('status', 'waiting')
-            ->update(['status' => 'serving']);
+        return DB::transaction(function () use ($reservation) {
+            $console = Console::where('type', $reservation->console_type)
+                ->where('status', 'available')
+                ->lockForUpdate()
+                ->first();
 
-        NotificationService::notifyCustomer(
-            $reservation->user_id,
-            'Sesi Dimulai',
-            'Sesi bermain kamu di ' . $reservation->console_type . ' telah dimulai. Selamat bermain!',
-            route('customer.dashboard'),
-            'reservation',
-            $reservation->id
-        );
+            if (!$console) {
+                return back()->with(
+                    'console_full',
+                    'Mohon maaf, console penuh. Tidak ada unit ' . $reservation->console_type . ' yang tersedia untuk dimulai.'
+                );
+            }
 
-        return back()->with('success', 'Sesi dimulai.');
+            $reservation->update([
+                'status' => 'active',
+                'started_at' => now(),
+            ]);
+
+            $console->update(['status' => 'busy']);
+
+            Queue::where('reservation_id', $reservation->id)
+                ->where('status', 'waiting')
+                ->update(['status' => 'serving']);
+
+            NotificationService::notifyCustomer(
+                $reservation->user_id,
+                'Sesi Dimulai',
+                'Sesi bermain kamu di ' . $reservation->console_type . ' telah dimulai. Selamat bermain!',
+                route('customer.dashboard'),
+                'reservation',
+                $reservation->id
+            );
+
+            return back()->with('success', 'Sesi dimulai.');
+        });
     }
 
     public function completeReservasi($id)
