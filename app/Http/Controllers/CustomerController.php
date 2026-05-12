@@ -268,7 +268,7 @@ class CustomerController extends Controller
         // Get reservations that are completed or active (need payment)
         $reservations = Reservation::where('user_id', $user->id)
             ->whereIn('status', ['active', 'completed'])
-            ->with('payment')
+            ->with(['payment', 'billingExtensions'])
             ->latest()
             ->paginate(10);
         
@@ -314,12 +314,10 @@ class CustomerController extends Controller
 
         $reservation = Reservation::where('id', $validated['reservation_id'])
             ->where('user_id', Auth::id())
+            ->with('billingExtensions')
             ->firstOrFail();
 
-        // Calculate food order total for this reservation
-        $foodTotal = FoodOrder::where('reservation_id', $reservation->id)
-            ->whereIn('status', ['approved', 'delivered'])
-            ->sum('total');
+        $grandTotal = $reservation->grandInvoiceTotal();
 
         // Check if payment already exists
         $existingPayment = Payment::where('reservation_id', $reservation->id)->first();
@@ -327,7 +325,7 @@ class CustomerController extends Controller
         $updateData = [
             'user_id' => Auth::id(),
             'reservation_id' => $reservation->id,
-            'total' => $reservation->total_price + $foodTotal,
+            'total' => $grandTotal,
             'method' => $validated['method'],
             'status' => 'pending',
             'payable_type' => 'reservation',
@@ -349,7 +347,7 @@ class CustomerController extends Controller
 
         NotificationService::notifyAdmins(
             'Bukti Pembayaran Baru',
-            'Pembayaran dari ' . Auth::user()->name . ' untuk reservasi #' . $reservation->id . ' senilai Rp ' . number_format($reservation->total_price),
+            'Pembayaran dari ' . Auth::user()->name . ' untuk reservasi #' . $reservation->id . ' senilai Rp ' . number_format($grandTotal),
             route('admin.pembayaran'),
             'payment',
             $paymentId
@@ -364,6 +362,7 @@ class CustomerController extends Controller
         
         $reservation = Reservation::where('id', $id)
             ->where('user_id', Auth::id())
+            ->with('billingExtensions')
             ->first();
 
         if (!$reservation) {

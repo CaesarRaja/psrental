@@ -194,16 +194,11 @@ class AdminController extends Controller
         $reservation = Reservation::findOrFail($id);
         $reservation->update(['status' => 'completed']);
 
-        // Calculate food order total
-        $foodTotal = FoodOrder::where('reservation_id', $reservation->id)
-            ->whereIn('status', ['approved', 'delivered'])
-            ->sum('total');
-
-        // Create payment including food orders
+        // Create payment: reservasi + perpanjangan disetujui + makanan disetujui
         Payment::create([
             'user_id' => $reservation->user_id,
             'reservation_id' => $reservation->id,
-            'total' => $reservation->total_price + $foodTotal,
+            'total' => $reservation->grandInvoiceTotal(),
             'method' => 'cash',
             'status' => 'completed',
         ]);
@@ -305,7 +300,7 @@ class AdminController extends Controller
 
     public function pembayaran(Request $request)
     {
-        $query = Payment::with(['customer', 'reservation.billingExtensions']);
+        $query = Payment::with(['customer', 'reservation.billingExtensions', 'reservation.foodOrders']);
 
         if ($request->status) {
             $query->where('status', $request->status);

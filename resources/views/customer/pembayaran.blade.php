@@ -47,14 +47,8 @@
     </div>
 
     <div class="dashboard-card mb-4">
-        <div class="card-header-custom d-flex justify-content-between align-items-center">
+        <div class="card-header-custom">
             <h5 class="mb-0"><i class="fas fa-gamepad me-2"></i>Reservasi yang Perlu Dibayar</h5>
-            <form action="{{ route('customer.pembayaran.destroyAll') }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin ingin menghapus SEMUA pembayaran kamu? Tindakan ini tidak dapat dibatalkan.');">
-                @csrf
-                <button type="submit" class="btn btn-sm btn-outline-danger">
-                    <i class="fas fa-trash-alt me-1"></i> Hapus Semua
-                </button>
-            </form>
         </div>
         <div class="card-body-custom p-0">
             <div class="table-responsive">
@@ -79,12 +73,10 @@
                             <td>{{ $reservation->console_type }}</td>
                             <td>{{ \Carbon\Carbon::parse($reservation->date)->format('d M Y') }}</td>
                             <td>{{ $reservation->duration }} jam</td>
-                            <td>Rp {{ number_format($reservation->total_price) }}</td>
+                            <td>Rp {{ number_format($reservation->reservationSubtotalWithExtensions()) }}</td>
                             <td>
                                 @php
-                                    $reservationFoodTotal = \App\Models\FoodOrder::where('reservation_id', $reservation->id)
-                                        ->whereIn('status', ['approved', 'delivered'])
-                                        ->sum('total');
+                                    $reservationFoodTotal = $reservation->approvedFoodOrdersTotal();
                                 @endphp
                                 @if($reservationFoodTotal > 0)
                                     Rp {{ number_format($reservationFoodTotal) }}
@@ -92,7 +84,7 @@
                                     -
                                 @endif
                             </td>
-                            <td><strong>Rp {{ number_format($reservation->total_price + $reservationFoodTotal) }}</strong></td>
+                            <td><strong>Rp {{ number_format($reservation->payment ? $reservation->payment->total : $reservation->grandInvoiceTotal()) }}</strong></td>
                             <td>
                                 @if($reservation->payment)
                                     <span class="status-badge status-{{ $reservation->payment->status }}">{{ ucfirst($reservation->payment->status) }}</span>

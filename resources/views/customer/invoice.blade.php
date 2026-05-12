@@ -12,13 +12,12 @@
     </div>
 
     @php
-        $pricePerHour = $reservation->console_type === 'PS4' ? 15000 : ($reservation->console_type === 'PS5' ? 25000 : 35000);
-        $approvedExtensions = $reservation->billingExtensions->where('status', 'approved');
-        $totalExtensionDuration = $approvedExtensions->sum('requested_duration');
-        $totalExtensionPrice = $totalExtensionDuration * ($pricePerHour / 60);
-        $reservationTotal = $reservation->total_price + $totalExtensionPrice;
-        $foodTotal = $foodOrders->sum('total');
-        $grandTotal = $reservationTotal + $foodTotal;
+        $pricePerHour = $reservation->pricePerHour();
+        $totalExtensionDuration = $reservation->approvedBillingExtensionMinutes();
+        $totalExtensionPrice = $reservation->approvedBillingExtensionPrice();
+        $reservationTotal = $reservation->reservationSubtotalWithExtensions();
+        $foodTotal = $reservation->approvedFoodOrdersTotal();
+        $grandTotal = $reservation->grandInvoiceTotal();
     @endphp
 
     <div class="invoice-details">

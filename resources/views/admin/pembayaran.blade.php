@@ -162,11 +162,13 @@
                                                     <td>{{ $payment->reservation->duration }} jam</td>
                                                 </tr>
                                                 @php
-                                                    $pricePerHour = $payment->reservation->console_type === 'PS4' ? 15000 : ($payment->reservation->console_type === 'PS5' ? 25000 : 35000);
-                                                    $approvedExtensions = $payment->reservation->billingExtensions->where('status', 'approved');
-                                                    $totalExtensionDuration = $approvedExtensions->sum('requested_duration');
-                                                    $totalExtensionPrice = $totalExtensionDuration * ($pricePerHour / 60);
-                                                    $grandTotal = $payment->reservation->total_price + $totalExtensionPrice;
+                                                    $r = $payment->reservation;
+                                                    $pricePerHour = $r->pricePerHour();
+                                                    $totalExtensionDuration = $r->approvedBillingExtensionMinutes();
+                                                    $totalExtensionPrice = $r->approvedBillingExtensionPrice();
+                                                    $reservationTotal = $r->reservationSubtotalWithExtensions();
+                                                    $foodOrdersApproved = $r->foodOrders->whereIn('status', ['approved', 'delivered']);
+                                                    $foodTotal = $r->approvedFoodOrdersTotal();
                                                 @endphp
                                                 <tr>
                                                     <td>Harga per Jam:</td>
@@ -183,11 +185,38 @@
                                                 </tr>
                                                 @endif
                                                 <tr class="total-row-admin">
-                                                    <td><strong>Total Tagihan:</strong></td>
-                                                    <td><strong>Rp {{ number_format($grandTotal) }}</strong></td>
+                                                    <td><strong>Total Reservasi:</strong></td>
+                                                    <td><strong>Rp {{ number_format($reservationTotal) }}</strong></td>
                                                 </tr>
                                             </table>
                                         </div>
+                                    </div>
+                                    @if($foodOrdersApproved->count() > 0)
+                                    <div class="food-orders-section-admin" style="margin: 20px 0; padding: 15px; border: 1px solid #eee; border-radius: 8px;">
+                                        <h5 style="color: #111; margin-bottom: 12px;">Pesanan Makanan & Minuman</h5>
+                                        <table class="invoice-table-admin">
+                                            @foreach($foodOrdersApproved as $foodOrder)
+                                                @foreach($foodOrder->items as $item)
+                                                <tr>
+                                                    <td>{{ $item['name'] ?? 'Item' }} x{{ $item['qty'] ?? 1 }}</td>
+                                                    <td style="text-align: right;">Rp {{ number_format(($item['price'] ?? 0) * ($item['qty'] ?? 1)) }}</td>
+                                                </tr>
+                                                @endforeach
+                                            @endforeach
+                                            <tr class="total-row-admin">
+                                                <td><strong>Subtotal Makanan:</strong></td>
+                                                <td style="text-align: right;"><strong>Rp {{ number_format($foodTotal) }}</strong></td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                    @endif
+                                    <div class="invoice-total-admin" style="margin: 12px 0; padding: 12px; background: #f8f9fa; border-radius: 8px;">
+                                        <table class="invoice-table-admin">
+                                            <tr class="total-row-admin">
+                                                <td><strong>Total Tagihan:</strong></td>
+                                                <td style="text-align: right;"><strong style="font-size: 1.1rem;">Rp {{ number_format($payment->total) }}</strong></td>
+                                            </tr>
+                                        </table>
                                     </div>
                                     <div class="invoice-footer-admin">
                                         <p>Terima kasih telah menggunakan layanan PS Rent Station!</p>
