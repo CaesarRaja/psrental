@@ -23,6 +23,27 @@
 @section('content')
     <div class="dashboard-card">
         <div class="card-header-custom">
+            <h5><i class="fas fa-tags me-2"></i>Daftar Harga Console</h5>
+        </div>
+        <div class="card-body-custom">
+            <div class="row g-3">
+                @foreach($consoleTypes as $ct)
+                <div class="col-md-4">
+                    <div class="d-flex justify-content-between align-items-center p-3 border rounded bg-light">
+                        <div>
+                            <h6 class="mb-1">{{ $ct->type }}</h6>
+                            <p class="mb-0 text-primary fw-bold">Rp {{ number_format($ct->price_per_hour) }}/jam</p>
+                        </div>
+                        <i class="fas fa-gamepad text-muted"></i>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+        </div>
+    </div>
+
+    <div class="dashboard-card mt-4">
+        <div class="card-header-custom">
             <h5><i class="fas fa-edit me-2"></i>Form Reservasi</h5>
         </div>
         <div class="card-body-custom">

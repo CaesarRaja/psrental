@@ -9,6 +9,34 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="{{ asset('css/style.css') }}" rel="stylesheet">
+    <style>
+        .toast-message {
+            animation: slideIn 0.3s ease-out;
+            transition: all 0.3s ease;
+        }
+        
+        .toast-message:hover {
+            transform: translateX(-5px);
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        .toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 9999;
+        }
+    </style>
     @stack('styles')
 </head>
 <body>
@@ -51,5 +79,34 @@
     <script src="{{ asset('js/main.js') }}"></script>
     <script src="{{ asset('js/dashboard.js') }}"></script>
     @stack('scripts')
+<div class="toast-container">
+        @if(session('success'))
+            <x-toast-message type="success" :message="session('success')" />
+        @endif
+        @if(session('error'))
+            <x-toast-message type="error" :message="session('error')" />
+        @endif
+        @if(session('info'))
+            <x-toast-message type="info" :message="session('info')" />
+        @endif
+        @if(session('warning'))
+            <x-toast-message type="warning" :message="session('warning')" />
+        @endif
+    </div>
+
+    <script>
+        // Auto-dismiss toast messages after 3 seconds
+        document.addEventListener('DOMContentLoaded', function() {
+            const toasts = document.querySelectorAll('.toast-message');
+            toasts.forEach(function(toast) {
+                setTimeout(function() {
+                    toast.style.animation = 'slideIn 0.3s ease-out reverse';
+                    setTimeout(function() {
+                        toast.remove();
+                    }, 300);
+                }, 3000);
+            });
+        });
+    </script>
 </body>
 </html>
