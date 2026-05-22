@@ -136,7 +136,7 @@
         </div>
     </div>
 
-    <div class="mt-3">
+    <div class="pagination-wrapper mt-4">
         {{ $reservations->links() ?? '' }}
     </div>
 @endsection

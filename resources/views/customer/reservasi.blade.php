@@ -142,6 +142,10 @@
             </div>
         </div>
     </div>
+
+    <div class="pagination-wrapper mt-4">
+        {{ $reservations->links() ?? '' }}
+    </div>
 @endsection
 
 @push('scripts')

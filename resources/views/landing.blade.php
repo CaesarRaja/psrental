@@ -16,7 +16,7 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto align-items-center">
                     <li class="nav-item">
-                        <a class="nav-link active" href="#beranda">Beranda</a>
+                        <a class="nav-link" href="#beranda">Beranda</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#fitur">Fitur</a>
@@ -166,7 +166,7 @@
                             <h4>PlayStation 4</h4>
                             <div class="price">
                                 <span class="currency">Rp</span>
-                                <span class="amount">15K</span>
+                                <span class="amount">{{ ($prices['PS4'] ?? 15000) >= 1000 ? (($prices['PS4'] ?? 15000) / 1000) . 'K' : ($prices['PS4'] ?? 15000) }}</span>
                                 <span class="period">/jam</span>
                             </div>
                         </div>
@@ -189,7 +189,7 @@
                             <h4>PlayStation 5</h4>
                             <div class="price">
                                 <span class="currency">Rp</span>
-                                <span class="amount">25K</span>
+                                <span class="amount">{{ ($prices['PS5'] ?? 25000) >= 1000 ? (($prices['PS5'] ?? 25000) / 1000) . 'K' : ($prices['PS5'] ?? 25000) }}</span>
                                 <span class="period">/jam</span>
                             </div>
                         </div>
@@ -209,7 +209,7 @@
                             <h4>PlayStation VR</h4>
                             <div class="price">
                                 <span class="currency">Rp</span>
-                                <span class="amount">35K</span>
+                                <span class="amount">{{ ($prices['VR'] ?? 35000) >= 1000 ? (($prices['VR'] ?? 35000) / 1000) . 'K' : ($prices['VR'] ?? 35000) }}</span>
                                 <span class="period">/jam</span>
                             </div>
                         </div>

@@ -63,7 +63,7 @@
                         <label for="email">Email</label>
                         <div class="input-wrapper">
                             <i class="fas fa-envelope input-icon"></i>
-                            <input type="email" name="email" id="email" class="form-control" placeholder="Masukkan email kamu" required>
+                            <input type="email" name="email" id="email" class="form-control" placeholder="Masukkan email kamu" value="{{ old('email', request()->cookie('remember_email')) }}" required>
                         </div>
                     </div>
 
@@ -80,7 +80,7 @@
 
                     <div class="form-options">
                         <div class="form-check">
-                            <input type="checkbox" class="form-check-input" name="remember" id="remember">
+                            <input type="checkbox" class="form-check-input" name="remember" id="remember" {{ old('remember') || request()->cookie('remember_email') ? 'checked' : '' }}>
                             <label class="form-check-label" for="remember">Ingat saya</label>
                         </div>
                     </div>

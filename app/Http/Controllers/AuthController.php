@@ -17,8 +17,16 @@ class AuthController extends Controller
             'password' => 'required'
         ]);
 
-        if (Auth::attempt($credentials, $request->remember)) {
+        $remember = $request->boolean('remember');
+
+        if (Auth::attempt($credentials, $remember)) {
             $request->session()->regenerate();
+
+            if ($remember) {
+                cookie()->queue('remember_email', $request->email, 43200); // 30 hari
+            } else {
+                cookie()->queue(cookie()->forget('remember_email'));
+            }
 
             $user = Auth::user();
             if ($user->role === 'admin') {

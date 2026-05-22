@@ -1188,7 +1188,90 @@ a {
 .header-actions {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 12px;
+}
+
+/* Normalizing Header Actions Buttons to be Uniform, Neat, and Premium */
+.header-actions .notification-btn,
+.header-actions .btn-submit,
+.header-actions button,
+.header-actions .btn {
+    height: 42px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    font-size: 0.875rem !important;
+    font-weight: 600 !important;
+    border-radius: var(--radius-sm) !important;
+    box-sizing: border-box !important;
+    white-space: nowrap !important;
+    transition: var(--transition) !important;
+    margin: 0 !important;
+}
+
+/* Ensure notification bell remains a square button */
+.header-actions .notification-btn {
+    width: 42px !important;
+    padding: 0 !important;
+}
+
+/* Regular submit/action buttons in header */
+.header-actions .btn-submit,
+.header-actions button.btn-submit {
+    padding: 0 20px !important;
+    background: var(--gradient-primary);
+    color: white !important;
+    border: none !important;
+    box-shadow: 0 2px 8px rgba(6, 182, 212, 0.2) !important;
+}
+
+.header-actions .btn-submit:hover,
+.header-actions button.btn-submit:hover {
+    box-shadow: 0 4px 12px rgba(6, 182, 212, 0.4) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* Specific styling for red/danger submit buttons in header actions (e.g. Reset button) */
+.header-actions button.btn-submit[style*="ef4444"],
+.header-actions button.btn-submit[style*="dc2626"],
+.header-actions button.btn-submit[style*="red"] {
+    background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2) !important;
+}
+
+.header-actions button.btn-submit[style*="ef4444"]:hover,
+.header-actions button.btn-submit[style*="dc2626"]:hover,
+.header-actions button.btn-submit[style*="red"]:hover {
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4) !important;
+}
+
+/* Form structure normalization in header */
+.header-actions form {
+    margin: 0 !important;
+    display: inline-block !important;
+}
+
+/* Logout button or outline danger button normalization */
+.header-actions .btn-outline-danger {
+    padding: 0 20px !important;
+    background: white !important;
+    color: #dc2626 !important;
+    border: 1.5px solid #fca5a5 !important;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05) !important;
+}
+
+.header-actions .btn-outline-danger:hover {
+    background: #fee2e2 !important;
+    color: #b91c1c !important;
+    border-color: #fca5a5 !important;
+    transform: translateY(-1px) !important;
+}
+
+/* Reset margin on icons inside header buttons since they are aligned with flex gap */
+.header-actions button i,
+.header-actions .btn i {
+    margin: 0 !important;
 }
 
 .notification-btn {
@@ -2145,4 +2228,86 @@ a {
 .app-notify__close:hover {
     background: rgba(148, 163, 184, 0.15);
     color: #1e293b;
+}
+
+/* ===== Custom Pagination (White-Grey Clean Modern Theme) ===== */
+.pagination-wrapper nav {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    width: 100% !important;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.pagination-wrapper nav .text-muted,
+.pagination-wrapper nav > div:first-child {
+    font-size: 0.875rem !important;
+    color: var(--text-muted) !important;
+    font-weight: 400;
+}
+
+.pagination-wrapper nav .fw-semibold {
+    font-weight: 600 !important;
+    color: var(--bg-dark) !important; /* Bold numbers in dark color for visibility */
+}
+
+.pagination {
+    margin-bottom: 0;
+    gap: 4px;
+    display: flex;
+    align-items: center;
+}
+
+.pagination .page-item .page-link {
+    background-color: #ffffff !important;
+    border: 1px solid #e5e7eb !important;
+    color: #4b5563 !important;
+    padding: 8px 14px !important;
+    font-size: 0.875rem !important;
+    font-weight: 500 !important;
+    border-radius: 8px !important; /* Elegant rounded-lg */
+    transition: all 0.2s ease-in-out !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-width: 38px !important;
+    height: 38px !important;
+}
+
+/* Active Page Item: Soft light grey background, dark text, subtle border */
+.pagination .page-item.active .page-link {
+    background-color: #f3f4f6 !important;
+    border-color: #d1d5db !important;
+    color: #111827 !important;
+    font-weight: 600 !important;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Hover State: Sleek hover */
+.pagination .page-item:not(.active) .page-link:hover {
+    background-color: #f9fafb !important;
+    border-color: #d1d5db !important;
+    color: #111827 !important;
+    transform: translateY(-1px) !important;
+}
+
+/* Disabled State: Clean light grey */
+.pagination .page-item.disabled .page-link {
+    background-color: #f9fafb !important;
+    border-color: #f3f4f6 !important;
+    color: #9ca3af !important;
+    opacity: 0.6 !important;
+    cursor: not-allowed !important;
+    box-shadow: none !important;
+}
+
+/* Fix for any oversized SVGs inside pagination */
+.pagination svg,
+.pagination svg.w-5.h-5 {
+    width: 1rem !important;
+    height: 1rem !important;
+    display: inline-block !important;
+    vertical-align: middle !important;
 }

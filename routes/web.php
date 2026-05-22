@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Models\Console;
 
 /*
 |--------------------------------------------------------------------------
@@ -10,7 +11,28 @@ use Illuminate\Support\Facades\Route;
 
 // Landing Page
 Route::get('/', function () {
-    return view('landing');
+    $prices = [
+        'PS4' => 15000,
+        'PS5' => 25000,
+        'VR' => 35000,
+    ];
+
+    try {
+        $dbPrices = Console::select('type', 'price_per_hour')
+            ->distinct()
+            ->pluck('price_per_hour', 'type')
+            ->toArray();
+
+        foreach ($dbPrices as $type => $price) {
+            if ($price > 0) {
+                $prices[$type] = $price;
+            }
+        }
+    } catch (\Exception $e) {
+        // Fallback
+    }
+
+    return view('landing', compact('prices'));
 })->name('home');
 
 // Auth Routes

@@ -120,6 +120,10 @@
         </div>
     </div>
 
+    <div class="pagination-wrapper mt-4">
+        {{ $payments->links() ?? '' }}
+    </div>
+
     <!-- Invoice Modal -->
     <div class="modal fade" id="invoiceModal" tabindex="-1">
         <div class="modal-dialog modal-lg">

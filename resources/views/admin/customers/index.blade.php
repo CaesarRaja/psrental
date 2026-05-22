@@ -96,7 +96,7 @@
                 </table>
             </div>
 
-            <div class="d-flex justify-content-end mt-3">
+            <div class="pagination-wrapper mt-4">
                 {{ $customers->links() }}
             </div>
         </div>
