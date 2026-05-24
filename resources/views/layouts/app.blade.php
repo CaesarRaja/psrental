@@ -75,6 +75,10 @@
         </main>
     </div>
 
+    @auth
+        @include('partials.chat-widget')
+    @endauth
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{{ asset('js/main.js') }}"></script>
     <script src="{{ asset('js/dashboard.js') }}"></script>
@@ -108,5 +112,23 @@
             });
         });
     </script>
+    @auth
+    <script>
+        // Heartbeat: update last_seen_at every 60 seconds to track online status
+        (function() {
+            function sendHeartbeat() {
+                fetch('{{ route("chat.heartbeat") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    }
+                }).catch(function() {});
+            }
+            sendHeartbeat(); // Immediately on page load
+            setInterval(sendHeartbeat, 60000); // Every 60 seconds
+        })();
+    </script>
+    @endauth
 </body>
 </html>
