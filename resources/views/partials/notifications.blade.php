@@ -19,11 +19,16 @@ $unreadCount = $notifications->where('is_read', false)->count();
     <div class="notification-dropdown" id="notificationDropdown">
         <div class="notification-header">
             <h6 class="mb-0">Notifikasi</h6>
-            @if($unreadCount > 0)
-                <button class="notification-mark-all" id="markAllRead">
-                    <small>Tandai semua dibaca</small>
+            <div class="d-flex align-items-center gap-2">
+                @if($unreadCount > 0)
+                    <button class="notification-mark-all" id="markAllRead">
+                        <small>Tandai semua dibaca</small>
+                    </button>
+                @endif
+                <button type="button" class="notification-close" id="notificationClose" aria-label="Tutup">
+                    <i class="fas fa-times"></i>
                 </button>
-            @endif
+            </div>
         </div>
         <div class="notification-body" id="notificationList">
             @forelse($notifications as $notification)

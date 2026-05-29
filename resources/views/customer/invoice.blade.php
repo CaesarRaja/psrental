@@ -165,4 +165,76 @@
     border-top: 1px solid #ddd;
     padding-top: 20px;
 }
+
+@media (max-width: 576px) {
+    .invoice-container {
+        padding: 8px;
+    }
+    .invoice-header {
+        flex-direction: column;
+        gap: 4px;
+        margin-bottom: 10px;
+        padding-bottom: 8px;
+    }
+    .invoice-info {
+        text-align: left;
+    }
+    .invoice-logo h3 {
+        font-size: 0.9rem;
+    }
+    .invoice-logo p {
+        font-size: 0.75rem;
+        margin-bottom: 0;
+    }
+    .invoice-info p {
+        font-size: 0.75rem;
+        margin-bottom: 2px;
+    }
+    .invoice-details {
+        margin-bottom: 10px;
+    }
+    .customer-info, .reservation-info {
+        margin-bottom: 8px;
+    }
+    .customer-info h5, .reservation-info h5 {
+        font-size: 0.8rem;
+        margin-bottom: 6px;
+    }
+    .customer-info p, .reservation-info p {
+        font-size: 0.75rem;
+        margin-bottom: 2px;
+    }
+    .invoice-table td {
+        padding: 4px 0;
+        font-size: 0.75rem;
+    }
+    .food-orders-section {
+        margin: 8px 0 !important;
+        padding: 8px !important;
+    }
+    .food-orders-section h5 {
+        font-size: 0.8rem;
+        margin-bottom: 6px !important;
+    }
+    .food-orders-section td {
+        font-size: 0.75rem;
+    }
+    .invoice-total {
+        margin: 8px 0 !important;
+        padding: 8px !important;
+    }
+    .invoice-total td {
+        font-size: 0.75rem;
+    }
+    .invoice-total td strong[style*="font-size"] {
+        font-size: 0.9rem !important;
+    }
+    .invoice-footer {
+        padding-top: 8px;
+    }
+    .invoice-footer p {
+        font-size: 0.7rem;
+        margin-bottom: 2px;
+    }
+}
 </style>

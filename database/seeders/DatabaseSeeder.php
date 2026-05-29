@@ -23,5 +23,7 @@ class DatabaseSeeder extends Seeder
                 'role' => 'admin',
             ]
         );
+
+        $this->call(ConsoleSeeder::class);
     }
 }

@@ -57,7 +57,7 @@
     </div>
 
     <div class="dashboard-card">
-        <div class="card-header-custom d-flex justify-content-between align-items-center">
+        <div class="card-header-custom header-wrap">
             <h5 class="mb-0"><i class="fas fa-comment-dots me-2"></i>Daftar Keluhan</h5>
             <form action="{{ route('admin.keluhan.destroyAll') }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin ingin menghapus SEMUA keluhan? Tindakan ini tidak dapat dibatalkan.');">
                 @csrf
@@ -68,7 +68,7 @@
         </div>
         <div class="card-body-custom p-0">
             <div class="table-responsive">
-                <table class="table-custom">
+                <table class="table-custom table-card-on-mobile">
                     <thead>
                         <tr>
                             <th>ID</th>
@@ -84,21 +84,21 @@
                     <tbody>
                         @forelse($complaints ?? [] as $complaint)
                         <tr>
-                            <td><strong>#{{ $complaint->id }}</strong></td>
-                            <td>{{ $complaint->customer->name ?? '-' }}</td>
-                            <td>{{ $complaint->subject }}</td>
-                            <td>{{ ucfirst($complaint->category) }}</td>
-                            <td>
+                            <td data-label="ID"><strong>#{{ $complaint->id }}</strong></td>
+                            <td data-label="Customer">{{ $complaint->customer->name ?? '-' }}</td>
+                            <td data-label="Judul">{{ $complaint->subject }}</td>
+                            <td data-label="Kategori">{{ ucfirst($complaint->category) }}</td>
+                            <td data-label="Prioritas">
                                 <span class="status-badge status-{{ $complaint->priority }}">
                                     {{ ucfirst($complaint->priority) }}
                                 </span>
                             </td>
-                            <td>
+                            <td data-label="Status">
                                 <span class="status-badge status-{{ $complaint->status }}">
                                     {{ ucfirst($complaint->status) }}
                                 </span>
                             </td>
-                            <td>
+                            <td data-label="Foto">
                                 @if($complaint->attachment)
                                     <a href="{{ asset('storage/' . $complaint->attachment) }}" target="_blank" class="btn btn-sm btn-outline-primary">
                                         <i class="fas fa-image"></i> Lihat
@@ -107,7 +107,7 @@
                                     <span class="text-muted">-</span>
                                 @endif
                             </td>
-                            <td>
+                            <td data-label="Aksi">
                                 <div class="d-flex flex-wrap gap-1">
                                     <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#responseModal{{ $complaint->id }}">
                                         <i class="fas fa-reply me-1"></i> Respon
@@ -129,46 +129,46 @@
 
 @foreach($complaints as $complaint)
 <div class="modal fade" id="responseModal{{ $complaint->id }}" tabindex="-1">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Respon Keluhan #{{ $complaint->id }}</h5>
+                <h5 class="modal-title">Respon #{{ $complaint->id }}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <form action="{{ route('admin.keluhan.response', $complaint->id) }}" method="POST">
                 @csrf
-                <div class="modal-body">
+                <div class="modal-body p-3 p-md-4">
                     <div class="mb-3">
                         <label class="form-label fw-bold">Customer</label>
-                        <p>{{ $complaint->customer->name ?? '-' }}</p>
+                        <p class="mb-0">{{ $complaint->customer->name ?? '-' }}</p>
                     </div>
-                    <div class="row mb-3">
-                        <div class="col-md-6">
+                    <div class="row g-3 mb-3">
+                        <div class="col-sm-6">
                             <label class="form-label fw-bold">Kategori</label>
-                            <p>{{ ucfirst($complaint->category) }}</p>
+                            <p class="mb-0">{{ ucfirst($complaint->category) }}</p>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-sm-6">
                             <label class="form-label fw-bold">Prioritas</label>
-                            <p>{{ ucfirst($complaint->priority) }}</p>
+                            <p class="mb-0">{{ ucfirst($complaint->priority) }}</p>
                         </div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-bold">Judul</label>
-                        <p>{{ $complaint->subject }}</p>
+                        <p class="mb-0">{{ $complaint->subject }}</p>
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-bold">Deskripsi</label>
-                        <p class="p-3 bg-light rounded">{{ $complaint->message }}</p>
+                        <p class="p-3 bg-light rounded mb-0">{{ $complaint->message }}</p>
                     </div>
                     @if($complaint->attachment)
                     <div class="mb-3">
                         <label class="form-label fw-bold">Foto Lampiran</label>
                         <div>
-                            <img src="{{ asset('storage/' . $complaint->attachment) }}" alt="Attachment" class="img-fluid rounded" style="max-height: 300px;">
+                            <img src="{{ asset('storage/' . $complaint->attachment) }}" alt="Attachment" class="img-fluid rounded" style="max-height: 250px;">
                         </div>
                     </div>
                     @endif
-                    <hr>
+                    <hr class="my-3">
                     <div class="mb-3">
                         <label class="form-label">Respon Admin</label>
                         <textarea name="response" class="form-control" rows="4" placeholder="Tulis respon Anda...">{{ $complaint->response ?? '' }}</textarea>

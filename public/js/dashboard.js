@@ -3,28 +3,75 @@
  */
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Sidebar Toggle for Mobile
+    // ===== Mobile Sidebar Toggle =====
     const sidebar = document.querySelector('.sidebar');
-    const sidebarToggle = document.querySelector('.sidebar-toggle');
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+    function openSidebar() {
+        sidebar.classList.add('active');
+        if (sidebarOverlay) sidebarOverlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeSidebar() {
+        sidebar.classList.remove('active');
+        if (sidebarOverlay) sidebarOverlay.classList.remove('active');
+        document.body.style.overflow = '';
+    }
 
     if (sidebarToggle) {
-        sidebarToggle.addEventListener('click', function() {
-            sidebar.classList.toggle('active');
+        sidebarToggle.addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (sidebar.classList.contains('active')) {
+                closeSidebar();
+            } else {
+                openSidebar();
+            }
         });
     }
 
-    // Close sidebar when clicking outside on mobile
-    document.addEventListener('click', function(e) {
-        if (window.innerWidth <= 991 && sidebar) {
-            const toggle = document.querySelector('.sidebar-toggle');
-            const sidebarContains = sidebar.contains(e.target);
-            const toggleContains = toggle && toggle.contains ? toggle.contains(e.target) : false;
-            
-            if (!sidebarContains && !toggleContains) {
-                sidebar.classList.remove('active');
-            }
+    // Close sidebar when clicking overlay
+    if (sidebarOverlay) {
+        sidebarOverlay.addEventListener('click', closeSidebar);
+    }
+
+    // Close sidebar with Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && sidebar && sidebar.classList.contains('active')) {
+            closeSidebar();
         }
     });
+
+    // ===== Touch swipe to close sidebar =====
+    if (sidebar) {
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        sidebar.addEventListener('touchstart', function(e) {
+            touchStartX = e.changedTouches[0].screenX;
+        }, { passive: true });
+
+        sidebar.addEventListener('touchend', function(e) {
+            touchEndX = e.changedTouches[0].screenX;
+            const swipeDistance = touchStartX - touchEndX;
+            // Swipe left more than 80px to close
+            if (swipeDistance > 80 && sidebar.classList.contains('active')) {
+                closeSidebar();
+            }
+        }, { passive: true });
+    }
+
+    // ===== Close sidebar when clicking a nav link on mobile =====
+    if (sidebar) {
+        sidebar.querySelectorAll('.sidebar-nav a').forEach(function(link) {
+            link.addEventListener('click', function() {
+                if (window.innerWidth <= 991) {
+                    closeSidebar();
+                }
+            });
+        });
+    }
 
     // Auto-refresh for queue system
     const queueNumber = document.getElementById('currentQueueNumber');
@@ -124,7 +171,7 @@ function updateConsoleStatus(consoleId, status) {
             const markAll = unreadCount > 0
                 ? '<button type="button" class="notification-mark-all" id="markAllRead"><small>Tandai semua dibaca</small></button>'
                 : '';
-            headerEl.innerHTML = '<h6 class="mb-0">Notifikasi</h6>' + markAll;
+            headerEl.innerHTML = '<h6 class="mb-0">Notifikasi</h6><div class="d-flex align-items-center gap-2">' + markAll + '<button type="button" class="notification-close" id="notificationClose" aria-label="Tutup"><i class="fas fa-times"></i></button></div>';
         }
 
         if (!notifications.length) {
@@ -236,6 +283,13 @@ function updateConsoleStatus(consoleId, status) {
         });
 
         notificationDropdown.addEventListener('click', function (e) {
+            const closeBtn = e.target.closest('#notificationClose');
+            if (closeBtn) {
+                e.stopPropagation();
+                notificationDropdown.classList.remove('active');
+                return;
+            }
+
             const markBtn = e.target.closest('#markAllRead');
             if (!markBtn) {
                 return;
