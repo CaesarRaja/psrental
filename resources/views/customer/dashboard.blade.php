@@ -7,17 +7,9 @@
 @endsection
 
 @section('header')
-    <div class="main-header">
-        <div>
-            <h2>Selamat Datang, {{ Auth::user()->name }}! 👋</h2>
-            <p class="text-muted mb-0">Ini dashboard reservasi PlayStation kamu</p>
-        </div>
-        <div class="header-actions">
-            @include('partials.notifications')
-            <a href="{{ route('logout') }}" class="btn btn-sm btn-outline-danger">
-                <i class="fas fa-sign-out-alt"></i> Logout
-            </a>
-        </div>
+    <div>
+        <h2>Selamat Datang, {{ Auth::user()->name }}! 👋</h2>
+        <p class="text-muted mb-0">Ini dashboard reservasi PlayStation kamu</p>
     </div>
 @endsection
 

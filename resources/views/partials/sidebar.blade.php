@@ -54,28 +54,9 @@
                 <i class="fas fa-credit-card"></i> Pembayaran
             </a></li>
             <li class="nav-label">Lainnya</li>
-            <li><a href="{{ route('customer.profile') }}" class="{{ $active === 'profile' ? 'active' : '' }}">
-                <i class="fas fa-user-circle"></i> Profil Saya
-            </a></li>
             <li><a href="{{ route('customer.keluhan') }}" class="{{ $active === 'keluhan' ? 'active' : '' }}">
                 <i class="fas fa-comment-dots"></i> Keluhan
             </a></li>
         @endif
     </ul>
-
-    <div class="sidebar-footer">
-        <div class="user-info">
-            <div class="user-avatar">
-                @if(isset(Auth::user()->name))
-                    {{ strtoupper(substr(Auth::user()->name, 0, 2)) }}
-                @else
-                    US
-                @endif
-            </div>
-            <div class="user-details">
-                <h6>{{ Auth::user()->name ?? 'Pengguna' }}</h6>
-                <small>{{ ucfirst(Auth::user()->role ?? 'pengguna') }}</small>
-            </div>
-        </div>
-    </div>
 </aside>

@@ -7,31 +7,29 @@
 @endsection
 
 @section('header')
-    <div class="main-header">
-        <div>
-            <h2>Kelola Stok Makanan</h2>
-            <p class="text-muted mb-0">Tambah, edit, dan kelola stok makanan & minuman</p>
-        </div>
-        <div class="header-actions">
-            @include('partials.notifications')
-            <button class="btn-submit" data-bs-toggle="modal" data-bs-target="#addFoodModal">
-                <i class="fas fa-plus me-2"></i> Tambah Makanan
-            </button>
-            <a href="{{ route('logout') }}" class="btn btn-sm btn-outline-danger">
-                <i class="fas fa-sign-out-alt"></i> Logout
-            </a>
-        </div>
+    <div>
+        <h2>Kelola Stok Makanan</h2>
+        <p class="text-muted mb-0">Tambah, edit, dan kelola stok makanan & minuman</p>
     </div>
 @endsection
 
+@push('header-actions')
+    <button class="btn-submit" data-bs-toggle="modal" data-bs-target="#addFoodModal">
+        <i class="fas fa-plus me-2"></i> Tambah Makanan
+    </button>
+@endpush
+
 @section('content')
     <div class="dashboard-card">
-        <div class="card-header-custom d-flex justify-content-between align-items-center">
+        <div class="card-header-custom header-wrap">
             <h5 class="mb-0"><i class="fas fa-utensils me-2"></i>Kelola Stok Makanan</h5>
+            <button class="btn-submit btn-block-mobile" data-bs-toggle="modal" data-bs-target="#addFoodModal">
+                <i class="fas fa-plus me-2"></i> Tambah Makanan
+            </button>
         </div>
         <div class="card-body-custom p-0">
             <div class="table-responsive">
-                <table class="table-custom">
+                <table class="table-custom table-card-on-mobile">
                     <thead>
                         <tr>
                             <th>Foto</th>
@@ -46,7 +44,7 @@
                     <tbody>
                         @forelse($foods ?? [] as $food)
                         <tr>
-                            <td>
+                            <td data-label="Foto">
                                 @if($food->photo)
                                     <img src="{{ asset('storage/' . $food->photo) }}" alt="{{ $food->name }}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px;">
                                 @else
@@ -55,18 +53,18 @@
                                     </div>
                                 @endif
                             </td>
-                            <td><strong>{{ $food->name }}</strong></td>
-                            <td>{{ $food->category }}</td>
-                            <td>Rp {{ number_format($food->price) }}</td>
-                            <td>{{ $food->stock }}</td>
-                            <td>
+                            <td data-label="Nama"><strong>{{ $food->name }}</strong></td>
+                            <td data-label="Kategori">{{ $food->category }}</td>
+                            <td data-label="Harga">Rp {{ number_format($food->price) }}</td>
+                            <td data-label="Stok">{{ $food->stock }}</td>
+                            <td data-label="Status">
                                 @if($food->status === 'available' && $food->stock > 0)
                                     <span class="status-badge status-available">Tersedia</span>
                                 @else
                                     <span class="status-badge status-cancelled">{{ $food->stock <= 0 ? 'Habis' : 'Tidak Tersedia' }}</span>
                                 @endif
                             </td>
-                            <td>
+                            <td data-label="Aksi">
                                 <div class="d-flex flex-wrap gap-1">
                                     <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editFoodModal{{ $food->id }}">
                                         <i class="fas fa-edit"></i> Edit
@@ -93,7 +91,7 @@
     </div>
 
     <div class="dashboard-card mt-4">
-        <div class="card-header-custom d-flex justify-content-between align-items-center">
+        <div class="card-header-custom header-wrap">
             <h5 class="mb-0"><i class="fas fa-shopping-bag me-2"></i>Pesanan Makanan Customer</h5>
             <form action="{{ route('admin.makanan.orders.destroyAll') }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin ingin menghapus SEMUA pesanan makanan? Tindakan ini tidak dapat dibatalkan.');">
                 @csrf
@@ -104,7 +102,7 @@
         </div>
         <div class="card-body-custom p-0">
             <div class="table-responsive">
-                <table class="table-custom">
+                <table class="table-custom table-card-on-mobile">
                     <thead>
                         <tr>
                             <th>ID</th>
@@ -119,15 +117,15 @@
                     <tbody>
                         @forelse($foodOrders ?? [] as $order)
                         <tr>
-                            <td><strong>#{{ $order->id }}</strong></td>
-                            <td>{{ $order->customer->name ?? '-' }}</td>
-                            <td>
+                            <td data-label="ID"><strong>#{{ $order->id }}</strong></td>
+                            <td data-label="Customer">{{ $order->customer->name ?? '-' }}</td>
+                            <td data-label="Items">
                                 @foreach($order->items as $item)
                                     <div>{{ $item['name'] ?? 'Item' }} x{{ $item['qty'] ?? 1 }}</div>
                                 @endforeach
                             </td>
-                            <td><strong>Rp {{ number_format($order->total) }}</strong></td>
-                            <td>
+                            <td data-label="Total"><strong>Rp {{ number_format($order->total) }}</strong></td>
+                            <td data-label="Status">
                                 @switch($order->status)
                                     @case('pending')
                                         <span class="status-badge status-pending">Menunggu</span>
@@ -151,8 +149,8 @@
                                         <span class="status-badge status-pending">{{ ucfirst($order->status) }}</span>
                                 @endswitch
                             </td>
-                            <td>{{ \Carbon\Carbon::parse($order->created_at)->format('d M Y H:i') }}</td>
-                            <td>
+                            <td data-label="Tanggal">{{ \Carbon\Carbon::parse($order->created_at)->format('d M Y H:i') }}</td>
+                            <td data-label="Aksi">
                                 <div class="d-flex flex-wrap gap-1">
                                     @if($order->status === 'pending')
                                         <form method="POST" action="{{ route('admin.makanan.order.update', $order->id) }}" class="d-inline">
@@ -194,7 +192,7 @@
 
     <!-- Add Food Modal -->
     <div class="modal fade" id="addFoodModal" tabindex="-1">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Tambah Makanan</h5>
@@ -202,7 +200,7 @@
                 </div>
                 <form method="POST" action="{{ route('admin.makanan.store') }}" enctype="multipart/form-data">
                     @csrf
-                    <div class="modal-body">
+                    <div class="modal-body p-3">
                         <div class="mb-3">
                             <label class="form-label">Foto Makanan</label>
                             <input type="file" name="photo" class="form-control" accept="image/*">
@@ -235,9 +233,9 @@
                             </select>
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="padding: 12px 32px; font-weight: 600;">Batal</button>
-                        <button type="submit" class="btn-submit">Simpan</button>
+                    <div class="modal-footer d-flex flex-column flex-sm-row">
+                        <button type="button" class="btn btn-secondary w-100 w-sm-auto" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn-submit w-100 w-sm-auto">Simpan</button>
                     </div>
                 </form>
             </div>
@@ -247,23 +245,23 @@
     @foreach($foods ?? [] as $food)
     <!-- Edit Food Modal -->
     <div class="modal fade" id="editFoodModal{{ $food->id }}" tabindex="-1">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Edit Makanan - {{ $food->name }}</h5>
+                    <h5 class="modal-title">Edit {{ $food->name }}</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <form method="POST" action="{{ route('admin.makanan.update', $food->id) }}" enctype="multipart/form-data">
                     @csrf
-                    <div class="modal-body">
+                    <div class="modal-body p-3">
                         <div class="mb-3">
                             <label class="form-label">Foto Saat Ini</label>
                             <div>
                                 @if($food->photo)
-                                    <img src="{{ asset('storage/' . $food->photo) }}" alt="{{ $food->name }}" style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px;">
+                                    <img src="{{ asset('storage/' . $food->photo) }}" alt="{{ $food->name }}" style="max-width: 100px; max-height: 100px; object-fit: cover; border-radius: 8px;">
                                 @else
-                                    <div style="width: 100px; height: 100px; background: #f1f5f9; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
-                                        <i class="fas fa-utensils" style="font-size: 2rem; color: #94a3b8;"></i>
+                                    <div style="width: 80px; height: 80px; background: #f1f5f9; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                                        <i class="fas fa-utensils" style="font-size: 1.5rem; color: #94a3b8;"></i>
                                     </div>
                                 @endif
                             </div>
@@ -300,9 +298,9 @@
                             </select>
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="padding: 12px 32px; font-weight: 600;">Batal</button>
-                        <button type="submit" class="btn-submit">Perbarui</button>
+                    <div class="modal-footer d-flex flex-column flex-sm-row">
+                        <button type="button" class="btn btn-secondary w-100 w-sm-auto" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn-submit w-100 w-sm-auto">Perbarui</button>
                     </div>
                 </form>
             </div>

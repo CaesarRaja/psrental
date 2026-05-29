@@ -7,12 +7,9 @@
 @endsection
 
 @section('header')
-    <div class="main-header">
-        <div>
-            <h2>Pengaturan Pembayaran</h2>
-            <p class="text-muted mb-0">Atur QRIS dan informasi rekening bank</p>
-        </div>
-        @include('partials.header-actions-auth')
+    <div>
+        <h2>Pengaturan Pembayaran</h2>
+        <p class="text-muted mb-0">Atur QRIS dan informasi rekening bank</p>
     </div>
 @endsection
 

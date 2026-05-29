@@ -7,11 +7,9 @@
 @endsection
 
 @section('header')
-    <div class="main-header">
-        <div>
-            <h2>Pesan Makanan & Minuman</h2>
-            <p class="text-muted mb-0">Nikmati makanan favorit sambil gaming!</p>
-        </div>
+    <div>
+        <h2>Pesan Makanan & Minuman</h2>
+        <p class="text-muted mb-0">Nikmati makanan favorit sambil gaming!</p>
     </div>
 @endsection
 

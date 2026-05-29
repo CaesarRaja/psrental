@@ -581,7 +581,7 @@ document.addEventListener('DOMContentLoaded', function() {
             html += `
                 <div class="chat-message-bubble ${senderClass}">
                     <div class="bubble-content">
-                        ${escapeHtml(msg.message)}
+                        <span class="bubble-text">${escapeHtml(msg.message)}</span>
                         <span class="bubble-time">${msg.time} ${readIcon}</span>
                     </div>
                 </div>
@@ -611,7 +611,7 @@ document.addEventListener('DOMContentLoaded', function() {
         bubble.className = `chat-message-bubble outgoing`;
         bubble.innerHTML = `
             <div class="bubble-content">
-                ${escapeHtml(msg.message)}
+                <span class="bubble-text">${escapeHtml(msg.message)}</span>
                 <span class="bubble-time">${msg.time} ${readIcon}</span>
             </div>
         `;

@@ -7,18 +7,17 @@
 @endsection
 
 @section('header')
-    <div class="main-header">
-        <div>
-            <h2>Profil Saya</h2>
-            <p class="text-muted mb-0">Kelola informasi akun kamu</p>
-        </div>
-        <div class="header-actions">
-            <a href="{{ route('customer.dashboard') }}" class="btn btn-sm btn-outline-secondary">
-                <i class="fas fa-arrow-left"></i> Kembali
-            </a>
-        </div>
+    <div>
+        <h2>Profil Saya</h2>
+        <p class="text-muted mb-0">Kelola informasi akun kamu</p>
     </div>
 @endsection
+
+@push('header-actions')
+    <a href="{{ route('customer.dashboard') }}" class="btn btn-sm btn-outline-secondary">
+        <i class="fas fa-arrow-left"></i> Kembali
+    </a>
+@endpush
 
 @section('content')
     @if(session('success'))

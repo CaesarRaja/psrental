@@ -7,12 +7,9 @@
 @endsection
 
 @section('header')
-    <div class="main-header">
-        <div>
-            <h2>Admin Dashboard 🛡️</h2>
-            <p class="text-muted mb-0">Kelola sistem rental PlayStation kamu</p>
-        </div>
-        @include('partials.header-actions-auth')
+    <div>
+        <h2><i class="fas fa-shield-alt me-2"></i>Admin Dashboard</h2>
+        <p class="text-muted mb-0">Kelola sistem rental PlayStation kamu</p>
     </div>
 @endsection
 
@@ -154,7 +151,7 @@
         </div>
         <div class="card-body-custom p-0">
             <div class="table-responsive">
-                <table class="table-custom">
+                <table class="table-custom table-card-on-mobile">
                     <thead>
                         <tr>
                             <th>Customer</th>
@@ -169,14 +166,14 @@
                         @endphp
                         @foreach($pendingFoodOrdersList as $order)
                         <tr>
-                            <td>{{ $order->customer->name ?? '-' }}</td>
-                            <td>
+                            <td data-label="Customer">{{ $order->customer->name ?? '-' }}</td>
+                            <td data-label="Items">
                                 @foreach($order->items as $item)
                                     <div>{{ $item['name'] ?? 'Item' }} x{{ $item['qty'] ?? 1 }}</div>
                                 @endforeach
                             </td>
-                            <td><strong>Rp {{ number_format($order->total) }}</strong></td>
-                            <td>
+                            <td data-label="Total"><strong>Rp {{ number_format($order->total) }}</strong></td>
+                            <td data-label="Aksi">
                                 <div class="d-flex flex-wrap gap-1">
                                     <form method="POST" action="{{ route('admin.makanan.order.update', $order->id) }}" class="d-inline">
                                         @csrf
@@ -210,7 +207,7 @@
         </div>
         <div class="card-body-custom p-0">
             <div class="table-responsive">
-                <table class="table-custom">
+                <table class="table-custom table-card-on-mobile">
                     <thead>
                         <tr>
                             <th>Customer</th>
@@ -222,10 +219,10 @@
                     <tbody>
                         @foreach($pendingBillingExtensions as $extension)
                         <tr>
-                            <td>{{ $extension->reservation->customer->name }}</td>
-                            <td>#{{ $extension->reservation->id }}</td>
-                            <td>{{ $extension->requested_duration }} menit</td>
-                            <td>
+                            <td data-label="Customer">{{ $extension->reservation->customer->name }}</td>
+                            <td data-label="Reservasi">#{{ $extension->reservation->id }}</td>
+                            <td data-label="Durasi">{{ $extension->requested_duration }} menit</td>
+                            <td data-label="Aksi">
                                 <div class="d-flex flex-wrap gap-1">
                                     <form method="POST" action="{{ route('admin.billing-extension.approve', $extension->id) }}" class="d-inline">
                                         @csrf
@@ -278,7 +275,7 @@
         </div>
         <div class="card-body-custom p-0">
             <div class="table-responsive">
-                <table class="table-custom">
+                <table class="table-custom table-card-on-mobile">
                     <thead>
                         <tr>
                             <th>Customer</th>
@@ -305,10 +302,10 @@
                             $remainingSeconds = $remaining % 60;
                         @endphp
                         <tr>
-                            <td>{{ $reservation->customer->name }}</td>
-                            <td>{{ $reservation->console_type }}</td>
-                            <td>{{ $reservation->start_time }}</td>
-                            <td>
+                            <td data-label="Customer">{{ $reservation->customer->name }}</td>
+                            <td data-label="Console">{{ $reservation->console_type }}</td>
+                            <td data-label="Mulai">{{ $reservation->start_time }}</td>
+                            <td data-label="Sisa Waktu">
                                 @if($remaining > 0)
                                     <span class="text-success timer-admin" id="timer-admin-{{ $reservation->id }}" data-remaining="{{ $remaining }}">
                                         {{ str_pad($remainingHours, 2, '0', STR_PAD_LEFT) }}:{{ str_pad($remainingMinutes, 2, '0', STR_PAD_LEFT) }}:{{ str_pad($remainingSeconds, 2, '0', STR_PAD_LEFT) }}
@@ -317,7 +314,7 @@
                                     <span class="text-danger">Habis</span>
                                 @endif
                             </td>
-                            <td><span class="status-badge status-active">Active</span></td>
+                            <td data-label="Status"><span class="status-badge status-active">Active</span></td>
                         </tr>
                         @endforeach
                     </tbody>
@@ -334,7 +331,7 @@
         </div>
         <div class="card-body-custom p-0">
             <div class="table-responsive">
-                <table class="table-custom">
+                <table class="table-custom table-card-on-mobile">
                     <thead>
                         <tr>
                             <th>ID</th>
@@ -350,14 +347,14 @@
                     <tbody>
                         @forelse($recentReservations ?? [] as $reservation)
                         <tr>
-                            <td><strong>#{{ $reservation->id }}</strong></td>
-                            <td>{{ $reservation->customer->name ?? '-' }}</td>
-                            <td>{{ $reservation->console_type }}</td>
-                            <td>{{ \Carbon\Carbon::parse($reservation->date)->format('d M Y') }}</td>
-                            <td>{{ $reservation->start_time }}</td>
-                            <td>{{ $reservation->duration }} jam</td>
-                            <td><strong>Rp {{ number_format($reservation->total_price) }}</strong></td>
-                            <td><span class="status-badge status-{{ $reservation->status }}">{{ ucfirst($reservation->status) }}</span></td>
+                            <td data-label="ID"><strong>#{{ $reservation->id }}</strong></td>
+                            <td data-label="Customer">{{ $reservation->customer->name ?? '-' }}</td>
+                            <td data-label="Console">{{ $reservation->console_type }}</td>
+                            <td data-label="Tanggal">{{ \Carbon\Carbon::parse($reservation->date)->format('d M Y') }}</td>
+                            <td data-label="Waktu">{{ $reservation->start_time }}</td>
+                            <td data-label="Durasi">{{ $reservation->duration }} jam</td>
+                            <td data-label="Total"><strong>Rp {{ number_format($reservation->total_price) }}</strong></td>
+                            <td data-label="Status"><span class="status-badge status-{{ $reservation->status }}">{{ ucfirst($reservation->status) }}</span></td>
                         </tr>
                         @empty
                         <tr>

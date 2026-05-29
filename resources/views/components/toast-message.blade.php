@@ -28,11 +28,13 @@
 @endphp
 
 @if($message)
-<div class="toast-message alert {{ $config['bgClass'] }} alert-dismissible d-flex align-items-center p-3 shadow-lg position-fixed" style="bottom: 20px; right: 20px; z-index: 9999; min-width: 300px; max-width: 400px; animation: slideIn 0.3s ease-out;" role="alert">
+<div class="toast-message alert {{ $config['bgClass'] }} alert-dismissible d-flex align-items-center p-3 shadow-lg position-fixed" role="alert"
+     style="bottom: 20px; right: 20px; z-index: 9999; min-width: 280px; max-width: 400px; animation: slideIn 0.3s ease-out;">
     <i class="{{ $config['icon'] }} me-2"></i>
     <div class="flex-grow-1">
         <strong>{{ $config['title'] }}</strong><br>
         <small>{{ $message }}</small>
     </div>
-    </div>
+    <button type="button" class="btn-close ms-2" data-bs-dismiss="alert"></button>
+</div>
 @endif

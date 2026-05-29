@@ -7,11 +7,9 @@
 @endsection
 
 @section('header')
-    <div class="main-header">
-        <div>
-            <h2>Keluhan & Umpan Balik</h2>
-            <p class="text-muted mb-0">Sampaikan keluhan atau masukan agar layanan kami lebih baik</p>
-        </div>
+    <div>
+        <h2>Keluhan & Umpan Balik</h2>
+        <p class="text-muted mb-0">Sampaikan keluhan atau masukan agar layanan kami lebih baik</p>
     </div>
 @endsection
 
@@ -24,7 +22,7 @@
             <form action="{{ route('customer.keluhan.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <div class="row g-3 mb-3">
-                    <div class="col-md-6">
+                    <div class="col-sm-6">
                         <label class="form-label">Kategori</label>
                         <select name="category" class="form-select" required>
                             <option value="">Pilih kategori...</option>
@@ -35,7 +33,7 @@
                             <option value="lainnya">Lainnya</option>
                         </select>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-sm-6">
                         <label class="form-label">Prioritas</label>
                         <select name="priority" class="form-select" required>
                             <option value="">Pilih prioritas...</option>
@@ -59,7 +57,7 @@
                     <input type="file" name="attachment" class="form-control" accept="image/*">
                     <small class="text-muted">Format: JPG, PNG, GIF. Maks 2MB.</small>
                 </div>
-                <button type="submit" class="btn-submit">
+                <button type="submit" class="btn-submit btn-block-mobile">
                     <i class="fas fa-paper-plane me-2"></i>Kirim Keluhan
                 </button>
             </form>
@@ -67,7 +65,7 @@
     </div>
 
     <div class="dashboard-card">
-        <div class="card-header-custom d-flex justify-content-between align-items-center">
+        <div class="card-header-custom header-wrap">
             <h5 class="mb-0"><i class="fas fa-history me-2"></i>Riwayat Keluhan</h5>
             <form action="{{ route('customer.keluhan.destroyAll') }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin ingin menghapus SEMUA keluhan kamu? Tindakan ini tidak dapat dibatalkan.');">
                 @csrf
@@ -78,7 +76,7 @@
         </div>
         <div class="card-body-custom p-0">
             <div class="table-responsive">
-                <table class="table-custom">
+                <table class="table-custom table-card-on-mobile">
                     <thead>
                         <tr>
                             <th>ID</th>
@@ -95,21 +93,21 @@
                     <tbody>
                         @forelse($complaints ?? [] as $complaint)
                         <tr>
-                            <td><strong>#{{ $complaint->id }}</strong></td>
-                            <td>{{ $complaint->subject }}</td>
-                            <td>{{ ucfirst($complaint->category) }}</td>
-                            <td>
+                            <td data-label="ID"><strong>#{{ $complaint->id }}</strong></td>
+                            <td data-label="Judul">{{ $complaint->subject }}</td>
+                            <td data-label="Kategori">{{ ucfirst($complaint->category) }}</td>
+                            <td data-label="Prioritas">
                                 <span class="status-badge status-{{ $complaint->priority }}">
                                     {{ ucfirst($complaint->priority) }}
                                 </span>
                             </td>
-                            <td>
+                            <td data-label="Status">
                                 <span class="status-badge status-{{ $complaint->status }}">
                                     {{ ucfirst($complaint->status) }}
                                 </span>
                             </td>
-                            <td>{{ $complaint->response ?? '-' }}</td>
-                            <td>
+                            <td data-label="Respons">{{ $complaint->response ?? '-' }}</td>
+                            <td data-label="Foto">
                                 @if($complaint->attachment)
                                     <a href="{{ asset('storage/' . $complaint->attachment) }}" target="_blank" class="btn btn-sm btn-outline-primary">
                                         <i class="fas fa-image"></i> Lihat
@@ -118,8 +116,8 @@
                                     <span class="text-muted">-</span>
                                 @endif
                             </td>
-                            <td>{{ \Carbon\Carbon::parse($complaint->created_at)->format('d M Y') }}</td>
-                            <td>
+                            <td data-label="Tanggal">{{ \Carbon\Carbon::parse($complaint->created_at)->format('d M Y') }}</td>
+                            <td data-label="Aksi">
                                 <span class="text-muted">-</span>
                             </td>
                         </tr>

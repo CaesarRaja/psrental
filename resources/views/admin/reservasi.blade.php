@@ -7,12 +7,9 @@
 @endsection
 
 @section('header')
-    <div class="main-header">
-        <div>
-            <h2>Manajemen Reservasi</h2>
-            <p class="text-muted mb-0">Kelola semua reservasi customer</p>
-        </div>
-        @include('partials.header-actions-auth')
+    <div>
+        <h2>Manajemen Reservasi</h2>
+        <p class="text-muted mb-0">Kelola semua reservasi customer</p>
     </div>
 @endsection
 
@@ -20,7 +17,7 @@
     <div class="dashboard-card mb-4">
         <div class="card-body-custom">
             <form action="{{ route('admin.reservasi') }}" method="GET" class="row g-3 align-items-end">
-                <div class="col-md-3">
+                <div class="col-sm-6 col-md-3">
                     <label class="form-label">Status</label>
                     <select name="status" class="form-select">
                         <option value="">Semua Status</option>
@@ -31,7 +28,7 @@
                         <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
                     </select>
                 </div>
-                <div class="col-md-3">
+                <div class="col-sm-6 col-md-3">
                     <label class="form-label">Console</label>
                     <select name="console" class="form-select">
                         <option value="">Semua Console</option>
@@ -40,11 +37,11 @@
                         <option value="VR">VR</option>
                     </select>
                 </div>
-                <div class="col-md-3">
+                <div class="col-sm-6 col-md-3">
                     <label class="form-label">Tanggal</label>
                     <input type="date" name="date" class="form-control" value="{{ request('date') }}">
                 </div>
-                <div class="col-md-3">
+                <div class="col-sm-6 col-md-3">
                     <button type="submit" class="btn-submit w-100">
                         <i class="fas fa-search me-2"></i> Filter
                     </button>
@@ -54,7 +51,7 @@
     </div>
 
     <div class="dashboard-card">
-        <div class="card-header-custom d-flex justify-content-between align-items-center">
+        <div class="card-header-custom header-wrap">
             <div class="d-flex align-items-center gap-2">
                 <h5 class="mb-0"><i class="fas fa-list me-2"></i>Daftar Reservasi</h5>
                 <span class="badge bg-primary">{{ $reservations->total() ?? 0 }} Total</span>
@@ -68,7 +65,7 @@
         </div>
         <div class="card-body-custom p-0">
             <div class="table-responsive">
-                <table class="table-custom">
+                <table class="table-custom table-card-on-mobile">
                     <thead>
                         <tr>
                             <th>ID</th>
@@ -85,15 +82,15 @@
                     <tbody>
                         @forelse($reservations ?? [] as $reservation)
                         <tr>
-                            <td><strong>#{{ $reservation->id }}</strong></td>
-                            <td>{{ $reservation->customer->name ?? '-' }}</td>
-                            <td>{{ $reservation->console_type }}</td>
-                            <td>{{ \Carbon\Carbon::parse($reservation->date)->format('d M Y') }}</td>
-                            <td>{{ $reservation->start_time }}</td>
-                            <td>{{ $reservation->duration }} jam</td>
-                            <td><strong>Rp {{ number_format($reservation->total_price) }}</strong></td>
-                            <td><span class="status-badge status-{{ $reservation->status }}">{{ ucfirst($reservation->status) }}</span></td>
-                            <td>
+                            <td data-label="ID"><strong>#{{ $reservation->id }}</strong></td>
+                            <td data-label="Customer">{{ $reservation->customer->name ?? '-' }}</td>
+                            <td data-label="Console">{{ $reservation->console_type }}</td>
+                            <td data-label="Tanggal">{{ \Carbon\Carbon::parse($reservation->date)->format('d M Y') }}</td>
+                            <td data-label="Waktu">{{ $reservation->start_time }}</td>
+                            <td data-label="Durasi">{{ $reservation->duration }} jam</td>
+                            <td data-label="Total"><strong>Rp {{ number_format($reservation->total_price) }}</strong></td>
+                            <td data-label="Status"><span class="status-badge status-{{ $reservation->status }}">{{ ucfirst($reservation->status) }}</span></td>
+                            <td data-label="Aksi">
                                 <div class="d-flex flex-wrap gap-1">
                                     @if($reservation->status === 'pending')
                                         <form action="{{ route('admin.reservasi.approve', $reservation->id) }}" method="POST" class="d-inline">

@@ -7,11 +7,9 @@
 @endsection
 
 @section('header')
-    <div class="main-header">
-        <div>
-            <h2>Pembayaran 💳</h2>
-            <p class="text-muted mb-0">Lakukan pembayaran setelah bermain</p>
-        </div>
+    <div>
+        <h2>Pembayaran 💳</h2>
+        <p class="text-muted mb-0">Lakukan pembayaran setelah bermain</p>
     </div>
 @endsection
 
@@ -52,7 +50,7 @@
         </div>
         <div class="card-body-custom p-0">
             <div class="table-responsive">
-                <table class="table-custom">
+                <table class="table-custom table-card-on-mobile">
                     <thead>
                         <tr>
                             <th>ID</th>
@@ -69,12 +67,12 @@
                     <tbody>
                         @forelse($reservations ?? [] as $reservation)
                         <tr>
-                            <td><strong>#{{ $reservation->id }}</strong></td>
-                            <td>{{ $reservation->console_type }}</td>
-                            <td>{{ \Carbon\Carbon::parse($reservation->date)->format('d M Y') }}</td>
-                            <td>{{ $reservation->duration }} jam</td>
-                            <td>Rp {{ number_format($reservation->reservationSubtotalWithExtensions()) }}</td>
-                            <td>
+                            <td data-label="ID"><strong>#{{ $reservation->id }}</strong></td>
+                            <td data-label="Console">{{ $reservation->console_type }}</td>
+                            <td data-label="Tanggal">{{ \Carbon\Carbon::parse($reservation->date)->format('d M Y') }}</td>
+                            <td data-label="Durasi">{{ $reservation->duration }} jam</td>
+                            <td data-label="Biaya Sewa">Rp {{ number_format($reservation->reservationSubtotalWithExtensions()) }}</td>
+                            <td data-label="Makanan">
                                 @php
                                     $reservationFoodTotal = $reservation->approvedFoodOrdersTotal();
                                 @endphp
@@ -84,15 +82,15 @@
                                     -
                                 @endif
                             </td>
-                            <td><strong>Rp {{ number_format($reservation->payment ? $reservation->payment->total : $reservation->grandInvoiceTotal()) }}</strong></td>
-                            <td>
+                            <td data-label="Total"><strong>Rp {{ number_format($reservation->payment ? $reservation->payment->total : $reservation->grandInvoiceTotal()) }}</strong></td>
+                            <td data-label="Status">
                                 @if($reservation->payment)
                                     <span class="status-badge status-{{ $reservation->payment->status }}">{{ ucfirst($reservation->payment->status) }}</span>
                                 @else
                                     <span class="badge bg-secondary">Belum Bayar</span>
                                 @endif
                             </td>
-                            <td>
+                            <td data-label="Aksi">
                                 <div class="d-flex flex-wrap gap-1 align-items-start">
                                     @if(!$reservation->payment || $reservation->payment->status === 'cancelled')
                                     <button class="btn btn-sm btn-primary" onclick="showInvoice({{ $reservation->id }})">
@@ -130,40 +128,38 @@
 
     <!-- Invoice Modal -->
     <div class="modal fade" id="invoiceModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title"><i class="fas fa-file-invoice me-2"></i>Invoice Pembayaran</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body p-3 p-md-4">
                     <div id="invoiceContent">
                         <!-- Invoice content will be loaded here -->
                     </div>
-                    <hr>
+                    <hr class="my-3">
                     <form action="{{ route('customer.pembayaran.store') }}" method="POST" enctype="multipart/form-data" id="paymentForm">
                         @csrf
                         <input type="hidden" name="reservation_id" id="reservationIdInput">
-                        <div class="row g-3">
-                            <div class="col-md-12">
-                                <label class="form-label">Metode Pembayaran</label>
-                                <select name="method" class="form-select" id="paymentMethod" required onchange="toggleProofUpload()">
-                                    <option value="">Pilih metode</option>
-                                    <option value="cash">Cash</option>
-                                    <option value="transfer">Transfer Bank</option>
-                                    <option value="qris">QRIS</option>
-                                </select>
-                            </div>
+                        <div class="mb-3">
+                            <label class="form-label">Metode Pembayaran</label>
+                            <select name="method" class="form-select" id="paymentMethod" required onchange="toggleProofUpload()">
+                                <option value="">Pilih metode</option>
+                                <option value="cash">Cash</option>
+                                <option value="transfer">Transfer Bank</option>
+                                <option value="qris">QRIS</option>
+                            </select>
                         </div>
 
-                        <div id="bankInfoDiv" style="display: none;" class="mt-3">
+                        <div id="bankInfoDiv" style="display: none;" class="mb-3">
                             @if($paymentSettings && $paymentSettings->bank_name)
                             <div class="p-3 bg-light rounded border">
                                 <h6 class="mb-2"><i class="fas fa-university me-2"></i>Informasi Transfer</h6>
                                 <table class="table table-borderless table-sm mb-0">
-                                    <tr><td>Bank</td><td><strong>{{ $paymentSettings->bank_name }}</strong></td></tr>
-                                    <tr><td>No. Rekening</td><td><strong>{{ $paymentSettings->account_number }}</strong></td></tr>
-                                    <tr><td>Atas Nama</td><td><strong>{{ $paymentSettings->account_holder }}</strong></td></tr>
+                                    <tr><td class="ps-0">Bank</td><td class="pe-0 text-end"><strong>{{ $paymentSettings->bank_name }}</strong></td></tr>
+                                    <tr><td class="ps-0">No. Rekening</td><td class="pe-0 text-end"><strong>{{ $paymentSettings->account_number }}</strong></td></tr>
+                                    <tr><td class="ps-0">Atas Nama</td><td class="pe-0 text-end"><strong>{{ $paymentSettings->account_holder }}</strong></td></tr>
                                 </table>
                             </div>
                             @else
@@ -173,10 +169,10 @@
                             @endif
                         </div>
 
-                        <div id="qrisInfoDiv" style="display: none;" class="mt-3 text-center">
+                        <div id="qrisInfoDiv" style="display: none;" class="mb-3 text-center">
                             @if($paymentSettings && $paymentSettings->qris_image)
                                 <h6 class="mb-2"><i class="fas fa-qrcode me-2"></i>Scan QRIS</h6>
-                                <img src="{{ asset('storage/' . $paymentSettings->qris_image) }}" alt="QRIS" class="img-fluid rounded border" style="max-height: 280px;">
+                                <img src="{{ asset('storage/' . $paymentSettings->qris_image) }}" alt="QRIS" class="img-fluid rounded border" style="max-height: 220px;">
                             @else
                             <div class="alert alert-warning mb-0">
                                 <i class="fas fa-exclamation-triangle me-1"></i> QRIS belum diatur oleh admin.
@@ -184,25 +180,71 @@
                             @endif
                         </div>
 
-                        <div class="row g-3 mt-2">
-                            <div class="col-md-12" id="proofUploadDiv" style="display: none;">
-                                <label class="form-label">Bukti Pembayaran</label>
-                                <input type="file" name="proof_image" class="form-control" accept="image/*">
-                                <small class="text-muted">Upload bukti pembayaran untuk Transfer atau QRIS (JPG, PNG, max 2MB)</small>
-                            </div>
+                        <div id="proofUploadDiv" style="display: none;" class="mb-3">
+                            <label class="form-label">Bukti Pembayaran</label>
+                            <input type="file" name="proof_image" class="form-control" accept="image/*">
+                            <small class="text-muted">Upload bukti pembayaran untuk Transfer atau QRIS (JPG, PNG, max 2MB)</small>
                         </div>
 
-                        <div class="mt-4">
-                            <button type="submit" class="btn-submit">
-                                <i class="fas fa-paper-plane me-2"></i> Kirim Pembayaran
-                            </button>
-                        </div>
+                        <button type="submit" class="btn-submit w-100">
+                            <i class="fas fa-paper-plane me-2"></i> Kirim Pembayaran
+                        </button>
                     </form>
                 </div>
             </div>
         </div>
     </div>
 @endsection
+
+@push('styles')
+<style>
+@media (max-width: 576px) {
+    #invoiceModal .modal-body {
+        padding: 12px !important;
+    }
+    #invoiceModal hr {
+        margin-top: 8px !important;
+        margin-bottom: 8px !important;
+    }
+    #invoiceModal .form-label {
+        font-size: 0.8rem;
+        margin-bottom: 4px;
+    }
+    #invoiceModal .form-select,
+    #invoiceModal .form-control {
+        font-size: 0.85rem !important;
+        padding: 8px 10px !important;
+        min-height: 38px;
+    }
+    #invoiceModal .mb-3 {
+        margin-bottom: 8px !important;
+    }
+    #invoiceModal .btn-submit {
+        font-size: 0.85rem;
+        padding: 10px 16px;
+    }
+    #bankInfoDiv .p-3 {
+        padding: 8px 10px !important;
+    }
+    #bankInfoDiv h6 {
+        font-size: 0.8rem;
+    }
+    #bankInfoDiv td {
+        font-size: 0.8rem;
+        padding: 3px 0;
+    }
+    #qrisInfoDiv h6 {
+        font-size: 0.8rem;
+    }
+    #qrisInfoDiv img {
+        max-height: 140px !important;
+    }
+    #proofUploadDiv small {
+        font-size: 0.7rem;
+    }
+}
+</style>
+@endpush
 
 @push('scripts')
 <script>

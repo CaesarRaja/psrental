@@ -7,22 +7,17 @@
 @endsection
 
 @section('header')
-    <div class="main-header">
-        <div>
-            <h2>Kelola Console</h2>
-            <p class="text-muted mb-0">Tambah, edit, dan kelola console & harga sewa</p>
-        </div>
-        <div class="header-actions">
-            @include('partials.notifications')
-            <button class="btn-submit" data-bs-toggle="modal" data-bs-target="#addConsoleModal">
-                <i class="fas fa-plus me-2"></i> Tambah Console
-            </button>
-            <a href="{{ route('logout') }}" class="btn btn-sm btn-outline-danger">
-                <i class="fas fa-sign-out-alt"></i> Logout
-            </a>
-        </div>
+    <div>
+        <h2>Kelola Console</h2>
+        <p class="text-muted mb-0">Tambah, edit, dan kelola console & harga sewa</p>
     </div>
 @endsection
+
+@push('header-actions')
+    <button class="btn-submit" data-bs-toggle="modal" data-bs-target="#addConsoleModal">
+        <i class="fas fa-plus me-2"></i> Tambah Console
+    </button>
+@endpush
 
 @section('content')
     <div class="stats-grid">

@@ -7,33 +7,28 @@
 @endsection
 
 @section('header')
-    <div class="main-header">
-        <div>
-            <h2>Sistem Antrian</h2>
-            <p class="text-muted mb-0">Kelola antrian customer dengan cepat</p>
-        </div>
-        <div class="header-actions">
-            @include('partials.notifications')
-            <div class="d-flex gap-2">
-            <form action="{{ route('admin.antrian.next') }}" method="POST" class="d-inline">
-                @csrf
-                <button type="submit" class="btn-submit">
-                    <i class="fas fa-forward me-2"></i> Next
-                </button>
-            </form>
-            <form action="{{ route('admin.antrian.reset') }}" method="POST" class="d-inline" onsubmit="return confirm('Reset semua antrian?')">
-                @csrf
-                <button type="submit" class="btn-submit" style="background: linear-gradient(135deg, #ef4444, #dc2626);">
-                    <i class="fas fa-trash-alt me-2"></i> Reset
-                </button>
-            </form>
-            </div>
-            <a href="{{ route('logout') }}" class="btn btn-sm btn-outline-danger">
-                <i class="fas fa-sign-out-alt"></i> Logout
-            </a>
-        </div>
+    <div>
+        <h2>Sistem Antrian</h2>
+        <p class="text-muted mb-0">Kelola antrian customer dengan cepat</p>
     </div>
 @endsection
+
+@push('header-actions')
+    <div class="d-flex gap-2">
+    <form action="{{ route('admin.antrian.next') }}" method="POST" class="d-inline">
+        @csrf
+        <button type="submit" class="btn-submit">
+            <i class="fas fa-forward me-2"></i> Next
+        </button>
+    </form>
+    <form action="{{ route('admin.antrian.reset') }}" method="POST" class="d-inline" onsubmit="return confirm('Reset semua antrian?')">
+        @csrf
+        <button type="submit" class="btn-submit" style="background: linear-gradient(135deg, #ef4444, #dc2626);">
+            <i class="fas fa-trash-alt me-2"></i> Reset
+        </button>
+    </form>
+    </div>
+@endpush
 
 @section('content')
     {{-- Stats Bar --}}

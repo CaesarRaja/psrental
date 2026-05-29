@@ -7,12 +7,9 @@
 @endsection
 
 @section('header')
-    <div class="main-header">
-        <div>
-            <h2>Kelola Pembayaran</h2>
-            <p class="text-muted mb-0">Tinjau dan konfirmasi pembayaran customer</p>
-        </div>
-        @include('partials.header-actions-auth')
+    <div>
+        <h2>Kelola Pembayaran</h2>
+        <p class="text-muted mb-0">Tinjau dan konfirmasi pembayaran customer</p>
     </div>
 @endsection
 
@@ -48,7 +45,7 @@
     </div>
 
     <div class="dashboard-card">
-        <div class="card-header-custom d-flex justify-content-between align-items-center">
+        <div class="card-header-custom header-wrap">
             <h5 class="mb-0"><i class="fas fa-credit-card me-2"></i>Daftar Pembayaran</h5>
             <form action="{{ route('admin.pembayaran.destroyAll') }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin ingin menghapus SEMUA pembayaran? Tindakan ini tidak dapat dibatalkan.');">
                 @csrf
@@ -59,7 +56,7 @@
         </div>
         <div class="card-body-custom p-0">
             <div class="table-responsive">
-                <table class="table-custom">
+                <table class="table-custom table-card-on-mobile">
                     <thead>
                         <tr>
                             <th>ID</th>
@@ -75,11 +72,11 @@
                     <tbody>
                         @forelse($payments ?? [] as $payment)
                         <tr>
-                            <td><strong>#{{ $payment->id }}</strong></td>
-                            <td>{{ $payment->customer->name ?? '-' }}</td>
-                            <td><strong>Rp {{ number_format($payment->total) }}</strong></td>
-                            <td>{{ ucfirst($payment->method) }}</td>
-                            <td>
+                            <td data-label="ID"><strong>#{{ $payment->id }}</strong></td>
+                            <td data-label="Customer">{{ $payment->customer->name ?? '-' }}</td>
+                            <td data-label="Total"><strong>Rp {{ number_format($payment->total) }}</strong></td>
+                            <td data-label="Metode">{{ ucfirst($payment->method) }}</td>
+                            <td data-label="Bukti">
                                 @if($payment->proof_image)
                                     <a href="{{ route('admin.pembayaran.proof', $payment->id) }}" target="_blank" class="btn btn-sm btn-outline-info">
                                         <i class="fas fa-image"></i> Lihat
@@ -88,14 +85,14 @@
                                     -
                                 @endif
                             </td>
-                            <td>
+                            <td data-label="Status">
                                 <span class="status-badge status-{{ $payment->status }}">{{ ucfirst($payment->status) }}</span>
                                 @if($payment->status === 'rejected' && $payment->rejection_reason)
                                     <br><small class="text-danger">{{ $payment->rejection_reason }}</small>
                                 @endif
                             </td>
-                            <td>{{ \Carbon\Carbon::parse($payment->created_at)->format('d M Y H:i') }}</td>
-                            <td>
+                            <td data-label="Tanggal">{{ \Carbon\Carbon::parse($payment->created_at)->format('d M Y H:i') }}</td>
+                            <td data-label="Aksi">
                                 <div class="d-flex flex-wrap gap-1">
                                     @if($payment->reservation)
                                         <button class="btn btn-sm btn-outline-primary" onclick="showInvoice({{ $payment->id }})">
@@ -126,13 +123,13 @@
 
     <!-- Invoice Modal -->
     <div class="modal fade" id="invoiceModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Invoice Pembayaran</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body" id="invoiceModalBody">
+                <div class="modal-body p-3 p-md-4" id="invoiceModalBody">
                     @foreach($payments as $payment)
                         @if($payment->reservation)
                             <div id="invoice-content-{{ $payment->id }}" class="invoice-content" style="display:none;">
@@ -240,7 +237,7 @@
 
     <!-- Reject Modal -->
     <div class="modal fade" id="rejectModal" tabindex="-1">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Tolak Pembayaran</h5>
@@ -248,7 +245,7 @@
                 </div>
                 <form id="rejectForm">
                     @csrf
-                    <div class="modal-body">
+                    <div class="modal-body p-3">
                         <div class="mb-3">
                             <label class="form-label">Alasan Penolakan</label>
                             <textarea class="form-control" name="reason" rows="3" required placeholder="Jelaskan alasan pembayaran ditolak..."></textarea>
@@ -323,25 +320,113 @@
 .invoice-container-admin {
     max-width: 100%;
     margin: 0 auto;
-    padding: 20px;
+    padding: 16px;
     border: 1px solid #ddd;
     border-radius: 8px;
     background: #fff;
 }
+@media (max-width: 576px) {
+    .invoice-container-admin {
+        padding: 6px;
+    }
+    .invoice-table-admin td {
+        font-size: 0.75rem;
+        padding: 3px 0;
+    }
+    .invoice-header-admin {
+        margin-bottom: 8px;
+        padding-bottom: 6px;
+        gap: 4px;
+    }
+    .invoice-logo-admin h3 {
+        font-size: 0.85rem;
+    }
+    .invoice-logo-admin p {
+        font-size: 0.7rem;
+        margin-bottom: 0;
+    }
+    .invoice-info-admin p {
+        font-size: 0.7rem;
+        margin-bottom: 2px;
+    }
+    .invoice-details-admin {
+        margin-bottom: 8px;
+    }
+    .customer-info-admin, .reservation-info-admin {
+        margin-bottom: 6px;
+    }
+    .customer-info-admin h5, .reservation-info-admin h5 {
+        font-size: 0.8rem;
+        margin-bottom: 4px;
+    }
+    .customer-info-admin p, .reservation-info-admin p {
+        font-size: 0.7rem;
+        margin-bottom: 2px;
+    }
+    .food-orders-section-admin {
+        margin: 6px 0 !important;
+        padding: 6px !important;
+    }
+    .food-orders-section-admin h5 {
+        font-size: 0.8rem;
+        margin-bottom: 4px !important;
+    }
+    .food-orders-section-admin td {
+        font-size: 0.75rem;
+    }
+    .invoice-total-admin {
+        margin: 6px 0 !important;
+        padding: 6px !important;
+    }
+    .invoice-total-admin td {
+        font-size: 0.75rem;
+    }
+    .invoice-total-admin td strong[style*="font-size"] {
+        font-size: 0.85rem !important;
+    }
+    .invoice-footer-admin {
+        padding-top: 8px;
+    }
+    .invoice-footer-admin p {
+        font-size: 0.7rem;
+        margin-bottom: 2px;
+    }
+    #invoiceModal .modal-body {
+        padding: 8px !important;
+    }
+    #invoiceModal .modal-footer {
+        padding: 8px 12px;
+    }
+    #invoiceModal .modal-footer .btn {
+        font-size: 0.85rem;
+        padding: 8px 16px;
+    }
+}
 .invoice-header-admin {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 30px;
+    margin-bottom: 20px;
     border-bottom: 2px solid #007bff;
-    padding-bottom: 20px;
+    padding-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 12px;
 }
 .invoice-logo-admin h3 {
     margin: 0;
     color: #0056b3;
+    font-size: 1.15rem;
 }
 .invoice-info-admin {
     text-align: right;
     color: #111;
+}
+@media (max-width: 576px) {
+    .invoice-header-admin {
+        flex-direction: column;
+    }
+    .invoice-info-admin {
+        text-align: left;
+    }
 }
 .invoice-details-admin {
     margin-bottom: 30px;

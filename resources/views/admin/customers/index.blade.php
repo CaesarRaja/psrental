@@ -7,12 +7,9 @@
 @endsection
 
 @section('header')
-    <div class="main-header">
-        <div>
-            <h2>Manajemen Customer</h2>
-            <p class="text-muted mb-0">Kelola semua akun customer</p>
-        </div>
-        @include('partials.header-actions-auth')
+    <div>
+        <h2>Manajemen Customer</h2>
+        <p class="text-muted mb-0">Kelola semua akun customer</p>
     </div>
 @endsection
 
@@ -44,7 +41,7 @@
             </form>
 
             <div class="table-responsive">
-                <table class="table table-hover align-middle">
+                <table class="table-custom table-card-on-mobile">
                     <thead>
                         <tr>
                             <th>#</th>
@@ -53,36 +50,34 @@
                             <th>No. HP</th>
                             <th>Alamat</th>
                             <th>Bergabung</th>
-                            <th class="text-end">Aksi</th>
+                            <th>Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($customers as $index => $customer)
                             <tr>
-                                <td>{{ $customers->firstItem() + $index }}</td>
-                                <td>
+                                <td data-label="#">{{ $customers->firstItem() + $index }}</td>
+                                <td data-label="Nama">
                                     <div class="d-flex align-items-center gap-2">
-                                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center"
+                                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center flex-shrink-0"
                                              style="width: 36px; height: 36px; font-size: 0.75rem; font-weight: 600;">
                                             {{ strtoupper(substr($customer->name, 0, 2)) }}
                                         </div>
                                         <span class="fw-semibold">{{ $customer->name }}</span>
                                     </div>
                                 </td>
-                                <td>{{ $customer->email }}</td>
-                                <td>{{ $customer->phone ?? '-' }}</td>
-                                <td>
+                                <td data-label="Email">{{ $customer->email }}</td>
+                                <td data-label="No. HP">{{ $customer->phone ?? '-' }}</td>
+                                <td data-label="Alamat">
                                     <span class="text-truncate d-inline-block" style="max-width: 200px;" title="{{ $customer->address }}">
                                         {{ $customer->address ?? '-' }}
                                     </span>
                                 </td>
-                                <td>{{ $customer->created_at->format('d M Y') }}</td>
-                                <td class="text-end">
-                                    <div class="d-flex flex-wrap gap-1 justify-content-end">
-                                        <a href="{{ route('admin.customers.edit', $customer->id) }}" class="btn btn-sm btn-primary">
-                                            <i class="fas fa-edit"></i> Edit
-                                        </a>
-                                    </div>
+                                <td data-label="Bergabung">{{ $customer->created_at->format('d M Y') }}</td>
+                                <td data-label="Aksi">
+                                    <a href="{{ route('admin.customers.edit', $customer->id) }}" class="btn btn-sm btn-primary">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </a>
                                 </td>
                             </tr>
                         @empty
