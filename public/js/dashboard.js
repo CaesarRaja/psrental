@@ -149,53 +149,60 @@ function updateConsoleStatus(consoleId, status) {
     }
 
     function renderNotificationsFromPayload(data) {
-        const listEl = document.getElementById('notificationList');
-        const headerEl = document.querySelector('#notificationDropdown .notification-header');
-        const toggleBtn = document.getElementById('notificationToggle');
-        if (!listEl || !toggleBtn) {
+        var wrappers = document.querySelectorAll('.notification-wrapper');
+        if (!wrappers.length) {
             return;
         }
 
-        const notifications = data.notifications || [];
-        const unreadCount = typeof data.unread_count === 'number' ? data.unread_count : 0;
+        var notifications = data.notifications || [];
+        var unreadCount = typeof data.unread_count === 'number' ? data.unread_count : 0;
 
-        let badge = toggleBtn.querySelector('.notification-badge');
-        if (unreadCount > 0) {
-            if (!badge) {
-                badge = document.createElement('span');
-                badge.className = 'notification-badge';
-                toggleBtn.appendChild(badge);
+        wrappers.forEach(function (wrapper) {
+            var toggleBtn = wrapper.querySelector('.notification-toggle');
+            var listEl = wrapper.querySelector('.notification-list');
+            var headerEl = wrapper.querySelector('.notification-header');
+            if (!listEl || !toggleBtn) {
+                return;
             }
-            badge.textContent = String(unreadCount);
-        } else if (badge) {
-            badge.remove();
-        }
 
-        if (headerEl) {
-            const markAll = unreadCount > 0
-                ? '<button type="button" class="notification-mark-all" id="markAllRead"><small>Tandai semua dibaca</small></button>'
-                : '';
-            headerEl.innerHTML = '<h6 class="mb-0">Notifikasi</h6><div class="d-flex align-items-center gap-2">' + markAll + '<button type="button" class="notification-close" id="notificationClose" aria-label="Tutup"><i class="fas fa-times"></i></button></div>';
-        }
+            var badge = toggleBtn.querySelector('.notification-badge');
+            if (unreadCount > 0) {
+                if (!badge) {
+                    badge = document.createElement('span');
+                    badge.className = 'notification-badge';
+                    toggleBtn.appendChild(badge);
+                }
+                badge.textContent = String(unreadCount);
+            } else if (badge) {
+                badge.remove();
+            }
 
-        if (!notifications.length) {
-            listEl.innerHTML = '<div class="notification-empty"><i class="fas fa-bell-slash"></i><p>Belum ada notifikasi</p></div>';
-            return;
-        }
+            if (headerEl) {
+                var markAll = unreadCount > 0
+                    ? '<button type="button" class="notification-mark-all mark-all-read"><small>Tandai semua dibaca</small></button>'
+                    : '';
+                headerEl.innerHTML = '<h6 class="mb-0">Notifikasi</h6><div class="d-flex align-items-center gap-2">' + markAll + '<button type="button" class="notification-close" aria-label="Tutup"><i class="fas fa-times"></i></button></div>';
+            }
 
-        listEl.innerHTML = notifications.map(function (n) {
-            const unread = !n.is_read;
-            const linkEsc = n.link ? escapeHtml(n.link) : '';
-            const dot = unread ? '<span class="notification-dot"></span>' : '';
-            return (
-                '<div class="notification-item ' + (unread ? 'unread' : 'read') + '" data-id="' + String(n.id) + '" data-link="' + linkEsc + '">' +
-                '<div class="notification-content">' +
-                '<div class="notification-title">' + escapeHtml(n.title) + '</div>' +
-                '<div class="notification-message">' + escapeHtml(n.message) + '</div>' +
-                '<div class="notification-time">' + escapeHtml(n.created_at_human || '') + '</div>' +
-                '</div>' + dot + '</div>'
-            );
-        }).join('');
+            if (!notifications.length) {
+                listEl.innerHTML = '<div class="notification-empty"><i class="fas fa-bell-slash"></i><p>Belum ada notifikasi</p></div>';
+                return;
+            }
+
+            listEl.innerHTML = notifications.map(function (n) {
+                var unread = !n.is_read;
+                var linkEsc = n.link ? escapeHtml(n.link) : '';
+                var dot = unread ? '<span class="notification-dot"></span>' : '';
+                return (
+                    '<div class="notification-item ' + (unread ? 'unread' : 'read') + '" data-id="' + String(n.id) + '" data-link="' + linkEsc + '">' +
+                    '<div class="notification-content">' +
+                    '<div class="notification-title">' + escapeHtml(n.title) + '</div>' +
+                    '<div class="notification-message">' + escapeHtml(n.message) + '</div>' +
+                    '<div class="notification-time">' + escapeHtml(n.created_at_human || '') + '</div>' +
+                    '</div>' + dot + '</div>'
+                );
+            }).join('');
+        });
     }
 
     function fetchNotificationsJson() {
@@ -219,43 +226,87 @@ function updateConsoleStatus(consoleId, status) {
     window.psRentalRefreshNotifications = pollNotifications;
 
     document.addEventListener('DOMContentLoaded', function () {
-        const notificationToggle = document.getElementById('notificationToggle');
-        const notificationDropdown = document.getElementById('notificationDropdown');
-        const listEl = document.getElementById('notificationList');
-
-        if (!notificationToggle || !notificationDropdown || !listEl) {
+        var wrappers = document.querySelectorAll('.notification-wrapper');
+        if (!wrappers.length) {
             return;
         }
 
-        notificationToggle.addEventListener('click', function (e) {
-            e.stopPropagation();
-            notificationDropdown.classList.toggle('active');
-            pollNotifications();
-        });
+        wrappers.forEach(function (wrapper) {
+            var notificationToggle = wrapper.querySelector('.notification-toggle');
+            var notificationDropdown = wrapper.querySelector('.notification-dropdown');
+            var listEl = wrapper.querySelector('.notification-list');
 
-        document.addEventListener('click', function (e) {
-            if (!notificationDropdown.contains(e.target) && !notificationToggle.contains(e.target)) {
-                notificationDropdown.classList.remove('active');
-            }
-        });
-
-        listEl.addEventListener('click', function (e) {
-            const item = e.target.closest('.notification-item');
-            if (!item) {
+            if (!notificationToggle || !notificationDropdown || !listEl) {
                 return;
             }
 
-            const id = item.dataset.id;
-            const link = item.dataset.link || '';
+            notificationToggle.addEventListener('click', function (e) {
+                e.stopPropagation();
+                notificationDropdown.classList.toggle('active');
+                pollNotifications();
+            });
 
-            function navigate() {
-                if (link) {
-                    window.location.href = link;
+            listEl.addEventListener('click', function (e) {
+                var item = e.target.closest('.notification-item');
+                if (!item) {
+                    return;
                 }
-            }
 
-            if (!item.classList.contains('read')) {
-                fetch('/notifications/' + id + '/read', {
+                var id = item.dataset.id;
+                var link = item.dataset.link || '';
+
+                function navigate() {
+                    if (link) {
+                        window.location.href = link;
+                    }
+                }
+
+                if (!item.classList.contains('read')) {
+                    fetch('/notifications/' + id + '/read', {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                            'Accept': 'application/json',
+                        },
+                    })
+                        .then(function () {
+                            item.classList.remove('unread');
+                            item.classList.add('read');
+                            var dot = item.querySelector('.notification-dot');
+                            if (dot) {
+                                dot.remove();
+                            }
+                            var badge = notificationToggle.querySelector('.notification-badge');
+                            if (badge) {
+                                var count = parseInt(badge.textContent, 10) - 1;
+                                if (count > 0) {
+                                    badge.textContent = String(count);
+                                } else {
+                                    badge.remove();
+                                }
+                            }
+                            return pollNotifications();
+                        })
+                        .finally(navigate);
+                } else {
+                    navigate();
+                }
+            });
+
+            notificationDropdown.addEventListener('click', function (e) {
+                var closeBtn = e.target.closest('.notification-close');
+                if (closeBtn) {
+                    e.stopPropagation();
+                    notificationDropdown.classList.remove('active');
+                    return;
+                }
+
+                var markBtn = e.target.closest('.mark-all-read');
+                if (!markBtn) {
+                    return;
+                }
+                e.stopPropagation();
+                fetch('/notifications/read-all', {
                     method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
@@ -263,53 +314,20 @@ function updateConsoleStatus(consoleId, status) {
                     },
                 })
                     .then(function () {
-                        item.classList.remove('unread');
-                        item.classList.add('read');
-                        const dot = item.querySelector('.notification-dot');
-                        if (dot) {
-                            dot.remove();
-                        }
-                        const badge = notificationToggle.querySelector('.notification-badge');
-                        if (badge) {
-                            const count = parseInt(badge.textContent, 10) - 1;
-                            if (count > 0) {
-                                badge.textContent = String(count);
-                            } else {
-                                badge.remove();
-                            }
-                        }
                         return pollNotifications();
                     })
-                    .finally(navigate);
-            } else {
-                navigate();
-            }
+                    .catch(function () {});
+            });
         });
 
-        notificationDropdown.addEventListener('click', function (e) {
-            const closeBtn = e.target.closest('#notificationClose');
-            if (closeBtn) {
-                e.stopPropagation();
-                notificationDropdown.classList.remove('active');
-                return;
-            }
-
-            const markBtn = e.target.closest('#markAllRead');
-            if (!markBtn) {
-                return;
-            }
-            e.stopPropagation();
-            fetch('/notifications/read-all', {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
-                    'Accept': 'application/json',
-                },
-            })
-                .then(function () {
-                    return pollNotifications();
-                })
-                .catch(function () {});
+        document.addEventListener('click', function (e) {
+            wrappers.forEach(function (wrapper) {
+                var toggle = wrapper.querySelector('.notification-toggle');
+                var dropdown = wrapper.querySelector('.notification-dropdown');
+                if (dropdown && dropdown.classList.contains('active') && !dropdown.contains(e.target) && !toggle.contains(e.target)) {
+                    dropdown.classList.remove('active');
+                }
+            });
         });
 
         setInterval(pollNotifications, 12000);

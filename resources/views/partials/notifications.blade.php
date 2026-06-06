@@ -9,28 +9,28 @@ $unreadCount = $notifications->where('is_read', false)->count();
 @endphp
 
 <div class="notification-wrapper">
-    <button class="notification-btn notification-toggle" id="notificationToggle" type="button">
+    <button class="notification-btn notification-toggle" type="button">
         <i class="fas fa-bell"></i>
         @if($unreadCount > 0)
             <span class="notification-badge">{{ $unreadCount }}</span>
         @endif
     </button>
 
-    <div class="notification-dropdown" id="notificationDropdown">
+    <div class="notification-dropdown">
         <div class="notification-header">
             <h6 class="mb-0">Notifikasi</h6>
             <div class="d-flex align-items-center gap-2">
                 @if($unreadCount > 0)
-                    <button class="notification-mark-all" id="markAllRead">
+                    <button class="notification-mark-all mark-all-read">
                         <small>Tandai semua dibaca</small>
                     </button>
                 @endif
-                <button type="button" class="notification-close" id="notificationClose" aria-label="Tutup">
+                <button type="button" class="notification-close" aria-label="Tutup">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
         </div>
-        <div class="notification-body" id="notificationList">
+        <div class="notification-body notification-list">
             @forelse($notifications as $notification)
                 <div class="notification-item {{ $notification->is_read ? 'read' : 'unread' }}" data-id="{{ $notification->id }}" data-link="{{ $notification->link }}">
                     <div class="notification-content">
