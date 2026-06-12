@@ -125,15 +125,15 @@
 @endsection
 
 @foreach($complaints as $complaint)
-<div class="modal fade" id="responseModal{{ $complaint->id }}" tabindex="-1">
-    <div class="modal-dialog modal-lg modal-dialog-scrollable">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Respon #{{ $complaint->id }}</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <form action="{{ route('admin.keluhan.response', $complaint->id) }}" method="POST">
-                @csrf
+<form action="{{ route('admin.keluhan.response', $complaint->id) }}" method="POST">
+    @csrf
+    <div class="modal fade" id="responseModal{{ $complaint->id }}" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Respon #{{ $complaint->id }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
                 <div class="modal-body p-3 p-md-4">
                     <div class="mb-3">
                         <label class="form-label fw-bold">Customer</label>
@@ -185,8 +185,8 @@
                         <i class="fas fa-paper-plane me-1"></i> Kirim Respon
                     </button>
                 </div>
-            </form>
+            </div>
         </div>
     </div>
-</div>
+</form>
 @endforeach

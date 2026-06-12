@@ -1,0 +1,55 @@
+/* ========================================
+   PS Rent Station - Cross-cutting Responsive
+   ======================================== */
+
+/* ===== Chat widget mobile fullscreen ===== */
+@media (max-width: 991px) {
+    .chat-widget-wrapper {
+        bottom: 130px;
+        right: 16px;
+    }
+
+    .chat-launcher {
+        width: 56px;
+        height: 56px;
+        font-size: 24px;
+    }
+}
+
+@media (max-width: 480px) {
+    .chat-widget-wrapper .chat-window {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        width: 100% !important;
+        height: 100% !important;
+        border-radius: 0;
+        border: none;
+    }
+
+    .chat-widget-wrapper.chat-maximized .chat-window {
+        width: 100% !important;
+        height: 100% !important;
+    }
+
+    .chat-launcher {
+        width: 52px;
+        height: 52px;
+        font-size: 22px;
+    }
+
+    .chat-widget-wrapper[data-is-admin="true"] .chat-sidebar {
+        display: none;
+    }
+
+    .chat-widget-wrapper[data-is-admin="true"] .chat-main-area {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .chat-widget-wrapper[data-is-admin="true"] .chat-subheader {
+        padding-left: 12px;
+    }
+}
