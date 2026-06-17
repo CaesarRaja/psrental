@@ -93,7 +93,7 @@
                     <tbody>
                         @forelse($complaints ?? [] as $complaint)
                         <tr>
-                            <td data-label="ID"><strong>#{{ $complaint->id }}</strong></td>
+                            <td data-label="ID"><strong>{{ $complaint->id }}</strong></td>
                             <td data-label="Judul">{{ $complaint->subject }}</td>
                             <td data-label="Kategori">{{ ucfirst($complaint->category) }}</td>
                             <td data-label="Prioritas">

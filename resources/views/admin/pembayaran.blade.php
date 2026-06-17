@@ -72,7 +72,7 @@
                     <tbody>
                         @forelse($payments ?? [] as $payment)
                         <tr>
-                            <td data-label="ID"><strong>#{{ $payment->id }}</strong></td>
+                            <td data-label="ID"><strong>{{ $payment->id }}</strong></td>
                             <td data-label="Customer">{{ $payment->customer->name ?? '-' }}</td>
                             <td data-label="Total"><strong>Rp {{ number_format($payment->total) }}</strong></td>
                             <td data-label="Metode">{{ ucfirst($payment->method) }}</td>
@@ -140,7 +140,7 @@
                                             <p>Invoice Pembayaran Reservasi</p>
                                         </div>
                                         <div class="invoice-info-admin">
-                                            <p><strong>Invoice #{{ $payment->reservation->id }}</strong></p>
+                                            <p><strong>Invoice {{ $payment->reservation->id }}</strong></p>
                                             <p>Tanggal: {{ \Carbon\Carbon::parse($payment->reservation->date)->format('d M Y') }}</p>
                                             <p>Waktu: {{ $payment->reservation->start_time }}</p>
                                         </div>

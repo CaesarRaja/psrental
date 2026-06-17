@@ -5,7 +5,7 @@
             <p>Invoice Pembayaran Reservasi</p>
         </div>
         <div class="invoice-info">
-            <p><strong>Invoice #{{ $reservation->id }}</strong></p>
+            <p><strong>Invoice {{ $reservation->id }}</strong></p>
             <p>Tanggal: {{ \Carbon\Carbon::parse($reservation->date)->format('d M Y') }}</p>
             <p>Waktu: {{ $reservation->start_time }}</p>
         </div>

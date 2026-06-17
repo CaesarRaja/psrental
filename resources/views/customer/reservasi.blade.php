@@ -114,7 +114,7 @@
                     <tbody>
                         @forelse($reservations ?? [] as $reservation)
                         <tr>
-                            <td data-label="ID"><strong>#{{ $reservation->id }}</strong></td>
+                            <td data-label="ID"><strong>{{ $reservation->id }}</strong></td>
                             <td data-label="Console">{{ $reservation->console_type }}</td>
                             <td data-label="Tanggal">{{ \Carbon\Carbon::parse($reservation->date)->format('d M Y') }}</td>
                             <td data-label="Waktu">{{ $reservation->start_time }}</td>

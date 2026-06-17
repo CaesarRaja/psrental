@@ -81,7 +81,7 @@
                     <tbody>
                         @forelse($complaints ?? [] as $complaint)
                         <tr>
-                            <td data-label="ID"><strong>#{{ $complaint->id }}</strong></td>
+                            <td data-label="ID"><strong>{{ $complaint->id }}</strong></td>
                             <td data-label="Customer">{{ $complaint->customer->name ?? '-' }}</td>
                             <td data-label="Judul">{{ $complaint->subject }}</td>
                             <td data-label="Kategori">{{ ucfirst($complaint->category) }}</td>
@@ -131,7 +131,7 @@
         <div class="modal-dialog modal-lg modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Respon #{{ $complaint->id }}</h5>
+                    <h5 class="modal-title">Respon {{ $complaint->id }}</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body p-3 p-md-4">

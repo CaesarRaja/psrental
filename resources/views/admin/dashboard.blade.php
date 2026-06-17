@@ -220,7 +220,7 @@
                         @foreach($pendingBillingExtensions as $extension)
                         <tr>
                             <td data-label="Customer">{{ $extension->reservation->customer->name }}</td>
-                            <td data-label="Reservasi">#{{ $extension->reservation->id }}</td>
+                            <td data-label="Reservasi">{{ $extension->reservation->id }}</td>
                             <td data-label="Durasi">{{ $extension->requested_duration }} menit</td>
                             <td data-label="Aksi">
                                 <div class="d-flex flex-wrap gap-1">
@@ -347,7 +347,7 @@
                     <tbody>
                         @forelse($recentReservations ?? [] as $reservation)
                         <tr>
-                            <td data-label="ID"><strong>#{{ $reservation->id }}</strong></td>
+                            <td data-label="ID"><strong>{{ $reservation->id }}</strong></td>
                             <td data-label="Customer">{{ $reservation->customer->name ?? '-' }}</td>
                             <td data-label="Console">{{ $reservation->console_type }}</td>
                             <td data-label="Tanggal">{{ \Carbon\Carbon::parse($reservation->date)->format('d M Y') }}</td>

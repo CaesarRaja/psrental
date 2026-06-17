@@ -169,7 +169,7 @@
                     <tbody>
                         @forelse($recentReservations ?? [] as $reservation)
                         <tr>
-                            <td><strong>#{{ $reservation->id }}</strong></td>
+                            <td><strong>{{ $reservation->id }}</strong></td>
                             <td>{{ $reservation->console_type }}</td>
                             <td>{{ $reservation->date }}</td>
                             <td>{{ $reservation->duration }} jam</td>

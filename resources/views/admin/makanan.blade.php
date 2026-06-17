@@ -117,7 +117,7 @@
                     <tbody>
                         @forelse($foodOrders ?? [] as $order)
                         <tr>
-                            <td data-label="ID"><strong>#{{ $order->id }}</strong></td>
+                            <td data-label="ID"><strong>{{ $order->id }}</strong></td>
                             <td data-label="Customer">{{ $order->customer->name ?? '-' }}</td>
                             <td data-label="Items">
                                 @foreach($order->items as $item)
