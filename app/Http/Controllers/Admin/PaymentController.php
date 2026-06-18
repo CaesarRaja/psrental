@@ -25,7 +25,7 @@ class PaymentController extends Controller
             $query->whereDate('created_at', $request->date);
         }
 
-        $payments = $query->latest()->paginate(15);
+        $payments = $query->oldest()->paginate(15);
         $todayRevenue = Payment::whereDate('created_at', today())->sum('total');
         $pendingPayments = Payment::where('status', 'pending')->count();
         $successfulPayments = Payment::where('status', 'completed')->count();

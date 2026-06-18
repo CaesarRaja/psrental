@@ -49,7 +49,7 @@ class AdminController extends Controller
             ];
         });
 
-        $recentReservations = Reservation::with('customer')->latest()->take(10)->get();
+        $recentReservations = Reservation::with('customer')->oldest()->take(10)->get();
 
         $weeklyReservations = Reservation::whereBetween('created_at', [now()->subWeek(), now()])->count();
         $newCustomers = User::where('role', 'customer')

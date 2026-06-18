@@ -25,11 +25,11 @@ class CustomerController extends Controller
 
         $loyaltyPoints = $totalSpent / 1000;
 
-        $recentReservations = Reservation::where('user_id', $user->id)
-            ->latest()->take(5)->get();
+$recentReservations = Reservation::where('user_id', $user->id)
+            ->oldest()->take(5)->get();
 
-        $foodOrders = FoodOrder::where('user_id', $user->id)
-            ->latest()->take(5)->get();
+$foodOrders = FoodOrder::where('user_id', $user->id)
+            ->oldest()->take(5)->get();
         $pendingFoodOrders = FoodOrder::where('user_id', $user->id)
             ->where('status', 'pending')
             ->count();

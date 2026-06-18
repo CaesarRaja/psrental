@@ -13,7 +13,7 @@ class ComplaintController extends Controller
 {
     public function keluhan()
     {
-        $complaints = Complaint::where('user_id', Auth::id())->latest()->get();
+        $complaints = Complaint::where('user_id', Auth::id())->oldest()->get();
         return view('customer.keluhan', compact('complaints'));
     }
 

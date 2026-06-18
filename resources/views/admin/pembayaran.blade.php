@@ -47,12 +47,6 @@
     <div class="dashboard-card">
         <div class="card-header-custom header-wrap">
             <h5 class="mb-0"><i class="fas fa-credit-card me-2"></i>Daftar Pembayaran</h5>
-            <form action="{{ route('admin.pembayaran.destroyAll') }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin ingin menghapus SEMUA pembayaran? Tindakan ini tidak dapat dibatalkan.');">
-                @csrf
-                <button type="submit" class="btn btn-sm btn-outline-danger">
-                    <i class="fas fa-trash-alt me-1"></i> Hapus Semua
-                </button>
-            </form>
         </div>
         <div class="card-body-custom p-0">
             <div class="table-responsive">

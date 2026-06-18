@@ -21,12 +21,12 @@ class PaymentController extends Controller
         $reservations = Reservation::where('user_id', $user->id)
             ->whereIn('status', ['active', 'completed'])
             ->with(['payment', 'billingExtensions'])
-            ->latest()
+            ->oldest()
             ->paginate(10);
 
         $paymentHistory = Payment::where('user_id', $user->id)
             ->with('reservation')
-            ->latest()
+            ->oldest()
             ->paginate(10);
 
         $totalSpent = Payment::where('user_id', $user->id)

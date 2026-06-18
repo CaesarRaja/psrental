@@ -15,7 +15,7 @@ class FoodController extends Controller
     public function makanan()
     {
         $foods = Food::where('status', 'available')->get();
-        $orders = FoodOrder::where('user_id', Auth::id())->latest()->get();
+        $orders = FoodOrder::where('user_id', Auth::id())->oldest()->get();
 
         return view('customer.makanan', compact('foods', 'orders'));
     }

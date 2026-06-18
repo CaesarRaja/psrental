@@ -12,7 +12,7 @@ class ComplaintController extends Controller
 {
     public function keluhan()
     {
-        $complaints = Complaint::with('customer')->latest()->get();
+        $complaints = Complaint::with('customer')->oldest()->get();
 
         $total = $complaints->count();
         $openComplaints = $complaints->where('status', 'open')->count();

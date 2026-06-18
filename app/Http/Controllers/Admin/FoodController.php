@@ -13,8 +13,8 @@ class FoodController extends Controller
 {
     public function makanan()
     {
-        $foods = Food::latest()->get();
-        $foodOrders = FoodOrder::with('customer')->latest()->get();
+        $foods = Food::oldest()->get();
+        $foodOrders = FoodOrder::with('customer')->oldest()->get();
         return view('admin.makanan', compact('foods', 'foodOrders'));
     }
 

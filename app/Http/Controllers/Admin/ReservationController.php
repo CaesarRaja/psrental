@@ -28,7 +28,7 @@ class ReservationController extends Controller
             $query->whereDate('date', $request->date);
         }
 
-        $reservations = $query->latest()->paginate(15);
+        $reservations = $query->oldest()->paginate(15);
 
         $availableByType = Console::where('status', 'available')
             ->selectRaw('type, COUNT(*) as cnt')

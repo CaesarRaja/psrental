@@ -18,7 +18,7 @@ class ReservationController extends Controller
     public function reservasi()
     {
         $reservations = Reservation::where('user_id', Auth::id())
-            ->latest()->paginate(10);
+            ->oldest()->paginate(10);
 
         $consoleTypes = Console::query()
             ->selectRaw('type, MAX(price_per_hour) as price_per_hour')
